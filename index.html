@@ -1,1194 +1,450 @@
-```html
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>F1 Stream Center</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <title>F1 Live</title>
 
-    body {
-      margin: 0;
-      background: #09090b;
-      color: #fff;
-      font-family: Inter, Arial, sans-serif;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(9, 9, 11, .92);
-      backdrop-filter: blur(15px);
-      border-bottom: 1px solid #27272a;
-    }
+        body {
+            margin: 0;
+            background: #080808;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-    .header {
-      max-width: 1400px;
-      margin: auto;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+        header {
+            padding: 22px 35px;
+            background: #101010;
+            border-bottom: 1px solid #242424;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    .logo {
-      font-size: 22px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
 
-    .logo span {
-      color: #ef4444;
-    }
+        .logo span {
+            color: #e10600;
+        }
 
-    .search {
-      margin-left: auto;
-      width: min(500px, 100%);
-    }
+        #status {
+            color: #888;
+            font-size: 13px;
+        }
 
-    .search input {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #3f3f46;
-      border-radius: 10px;
-      background: #18181b;
-      color: white;
-      outline: none;
-    }
+        main {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px;
+        }
 
-    .search input:focus {
-      border-color: #71717a;
-    }
+        h1 {
+            margin: 0 0 25px;
+            font-size: 32px;
+        }
 
-    main {
-      max-width: 1400px;
-      margin: auto;
-      padding: 30px 24px 60px;
-    }
+        #streams {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
 
-    .hero {
-      padding: 35px;
-      border: 1px solid #27272a;
-      border-radius: 18px;
-      margin-bottom: 30px;
-      background:
-        radial-gradient(
-          circle at 90% 10%,
-          rgba(239, 68, 68, .20),
-          transparent 35%
-        ),
-        #111113;
-    }
+        .card {
+            background: #121212;
+            border: 1px solid #252525;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: .2s;
+        }
 
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(30px, 5vw, 52px);
-    }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #e10600;
+        }
 
-    .hero p {
-      margin: 0;
-      color: #a1a1aa;
-    }
+        .poster {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            background: #1c1c1c;
+        }
 
-    .status {
-      margin-top: 18px;
-      font-size: 13px;
-      color: #71717a;
-    }
+        .info {
+            padding: 15px;
+        }
 
-    .error {
-      display: none;
-      padding: 15px;
-      margin-bottom: 25px;
-      border: 1px solid #7f1d1d;
-      border-radius: 10px;
-      background: rgba(127, 29, 29, .2);
-      color: #fca5a5;
-    }
+        .name {
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
 
-    .section {
-      margin-bottom: 40px;
-    }
+        .tag {
+            color: #999;
+            font-size: 13px;
+        }
 
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
+        .live {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            background: #e10600;
+            font-size: 11px;
+            font-weight: bold;
+        }
 
-    .section-title {
-      font-size: 22px;
-      font-weight: 800;
-    }
+        .empty {
+            color: #888;
+            padding: 30px 0;
+        }
 
-    .count {
-      color: #71717a;
-      font-size: 13px;
-    }
+        /* Player */
 
-    .grid {
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fill, minmax(230px, 1fr));
-      gap: 16px;
-    }
+        #player {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+        }
 
-    .card {
-      overflow: hidden;
-      border: 1px solid #27272a;
-      border-radius: 14px;
-      background: #111113;
-      cursor: pointer;
-      transition: .15s ease;
-    }
+        #playerHeader {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: #111;
+        }
 
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: #52525b;
-    }
+        #playerTitle {
+            font-weight: bold;
+        }
 
-    .thumbnail {
-      position: relative;
-      aspect-ratio: 16 / 9;
-      background: #18181b;
-      overflow: hidden;
-    }
+        #closePlayer {
+            border: 0;
+            background: #e10600;
+            color: white;
+            padding: 9px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    .thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+        #frameContainer {
+            height: calc(100vh - 60px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .live {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 5px 8px;
-      border-radius: 5px;
-      background: #dc2626;
-      color: white;
-      font-size: 11px;
-      font-weight: 800;
-    }
+        #frameContainer iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
 
-    .card-content {
-      padding: 14px;
-    }
+        .no-embed {
+            color: #aaa;
+            text-align: center;
+        }
 
-    .title {
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        @media (max-width: 600px) {
+            header {
+                padding: 18px;
+            }
 
-    .category {
-      margin-top: 5px;
-      color: #71717a;
-      font-size: 13px;
-    }
-
-    .empty {
-      padding: 50px;
-      border: 1px dashed #3f3f46;
-      border-radius: 14px;
-      text-align: center;
-      color: #71717a;
-    }
-
-    /* PLAYER */
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(0, 0, 0, .85);
-    }
-
-    .overlay.active {
-      display: flex;
-    }
-
-    .player {
-      width: min(1100px, 100%);
-      overflow: hidden;
-      border: 1px solid #27272a;
-      border-radius: 15px;
-      background: #09090b;
-    }
-
-    .player-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 18px;
-      border-bottom: 1px solid #27272a;
-    }
-
-    .player-title {
-      font-weight: 700;
-    }
-
-    .close {
-      border: 0;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background: #27272a;
-      color: white;
-      cursor: pointer;
-    }
-
-    video,
-    iframe {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border: 0;
-      background: black;
-    }
-
-    @media (max-width: 650px) {
-      .header {
-        flex-wrap: wrap;
-        padding: 15px;
-      }
-
-      .search {
-        order: 3;
-        width: 100%;
-      }
-
-      main {
-        padding: 20px 14px;
-      }
-
-      .hero {
-        padding: 25px;
-      }
-
-      .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .card-content {
-        padding: 10px;
-      }
-    }
-  </style>
+            main {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <header>
-  <div class="header">
     <div class="logo">
-      Stream<span>Center</span>
+        <span>F1</span> Live
     </div>
 
-    <div class="search">
-      <input
-        id="search"
-        type="search"
-        placeholder="Zoek naar F1, voetbal, tennis..."
-      >
+    <div id="status">
+        Laden...
     </div>
-  </div>
 </header>
 
 <main>
+    <h1>Formula 1</h1>
 
-  <section class="hero">
-    <h1>Live Streams</h1>
-    <p>Beschikbare streams</p>
-    <div id="status" class="status">
-      Verbinding maken...
+    <div id="streams">
+        <div class="empty">Streams laden...</div>
     </div>
-  </section>
-
-  <div id="error" class="error"></div>
-
-  <div id="content">
-    <div class="empty">
-      Streams laden...
-    </div>
-  </div>
-
 </main>
 
-<div id="overlay" class="overlay">
-
-  <div class="player">
-
-    <div class="player-header">
-      <div id="playerTitle" class="player-title">
-        Stream
-      </div>
-
-      <button
-        class="close"
-        onclick="closePlayer()">
-        Sluiten
-      </button>
+<!-- Player -->
+<div id="player">
+    <div id="playerHeader">
+        <div id="playerTitle">F1</div>
+        <button id="closePlayer">Sluiten</button>
     </div>
 
-    <video
-      id="video"
-      controls
-      playsinline
-      style="display:none">
-    </video>
-
-    <iframe
-      id="iframe"
-      allow="autoplay; fullscreen"
-      allowfullscreen
-      style="display:none">
-    </iframe>
-
-  </div>
-
+    <div id="frameContainer"></div>
 </div>
 
 <script>
+    const API_URL = "https://api.ppv.st/api/streams";
 
-  /*
-   * ==========================================================
-   * CONFIG
-   * ==========================================================
-   */
+    const streamsContainer = document.getElementById("streams");
+    const statusElement = document.getElementById("status");
 
-  const DEFAULT_DOMAIN = "api.ppv.st";
-
-  const PING_PATH = "/api/ping";
-  const STREAMS_PATH = "/api/streams";
-
-  let streams = [];
-  let domains = [];
+    const player = document.getElementById("player");
+    const playerTitle = document.getElementById("playerTitle");
+    const frameContainer = document.getElementById("frameContainer");
+    const closePlayer = document.getElementById("closePlayer");
 
 
-  /*
-   * ==========================================================
-   * HELPERS
-   * ==========================================================
-   */
+    async function loadStreams() {
+        try {
+            statusElement.textContent = "Streams ophalen...";
 
-  function cleanDomain(domain) {
+            const response = await fetch(API_URL);
 
-    if (!domain) {
-      return null;
+            if (!response.ok) {
+                throw new Error("API request mislukt");
+            }
+
+            const data = await response.json();
+
+            if (!data.success || !Array.isArray(data.streams)) {
+                throw new Error("Ongeldige API-response");
+            }
+
+            /*
+             * Zoek alle streams die bij Formula 1 horen.
+             *
+             * We controleren zowel de categorie als de naam/tag,
+             * omdat F1-events niet noodzakelijk allemaal dezelfde
+             * categorienaam hoeven te gebruiken.
+             */
+            const f1Streams = [];
+
+            for (const category of data.streams) {
+
+                const categoryName =
+                    String(category.category || "").toLowerCase();
+
+                for (const stream of (category.streams || [])) {
+
+                    const text = [
+                        categoryName,
+                        stream.category_name || "",
+                        stream.name || "",
+                        stream.tag || "",
+                        stream.uri_name || ""
+                    ]
+                    .join(" ")
+                    .toLowerCase();
+
+                    if (
+                        text.includes("formula 1") ||
+                        text.includes("formula1") ||
+                        text.includes("f1")
+                    ) {
+                        f1Streams.push(stream);
+                    }
+                }
+            }
+
+            renderStreams(f1Streams);
+
+            const time = new Date(
+                (data.timestamp || Math.floor(Date.now() / 1000)) * 1000
+            );
+
+            statusElement.textContent =
+                `${f1Streams.length} F1 stream(s) • ${time.toLocaleTimeString()}`;
+
+        } catch (error) {
+            console.error(error);
+
+            statusElement.textContent = "Fout";
+
+            streamsContainer.innerHTML = `
+                <div class="empty">
+                    Kon de streams niet laden.<br><br>
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
     }
 
-    domain = String(domain).trim();
 
-    // https://example.com -> example.com
-    domain = domain.replace(/^https?:\/\//i, "");
+    function renderStreams(streams) {
 
-    // trailing slash verwijderen
-    domain = domain.replace(/\/+$/, "");
+        streamsContainer.innerHTML = "";
 
-    // eventuele path niet verwijderen:
-    // sommige mirrors kunnen namelijk een eigen API-base hebben
+        if (streams.length === 0) {
+            streamsContainer.innerHTML = `
+                <div class="empty">
+                    Er zijn momenteel geen F1-streams beschikbaar.
+                </div>
+            `;
 
-    return domain;
-  }
-
-
-  function makeUrl(domain, path) {
-
-    domain = cleanDomain(domain);
-
-    if (!domain) {
-      return null;
-    }
-
-    return `https://${domain}${path}`;
-  }
-
-
-  function getValue(object, keys) {
-
-    for (const key of keys) {
-
-      if (
-        object &&
-        object[key] !== undefined &&
-        object[key] !== null &&
-        object[key] !== ""
-      ) {
-        return object[key];
-      }
-
-    }
-
-    return "";
-  }
-
-
-  /*
-   * ==========================================================
-   * PING
-   *
-   * GET /api/ping
-   *
-   * Verwacht bijvoorbeeld:
-   *
-   * {
-   *   "success": true,
-   *   "domains": [
-   *      "api.ppv.st",
-   *      "mirror.example.com"
-   *   ]
-   * }
-   * ==========================================================
-   */
-
-  async function getDomains() {
-
-    const pingUrl = makeUrl(
-      DEFAULT_DOMAIN,
-      PING_PATH
-    );
-
-    const response = await fetch(
-      pingUrl,
-      {
-        method: "GET",
-        headers: {
-          "Accept": "application/json"
-        },
-        cache: "no-store"
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Ping mislukt (${response.status})`
-      );
-    }
-
-    const data = await response.json();
-
-    if (
-      data &&
-      data.success === false
-    ) {
-      throw new Error("API ping returned success=false");
-    }
-
-    const result = [];
-
-    // Default domain altijd meenemen.
-    result.push(DEFAULT_DOMAIN);
-
-    if (
-      data &&
-      Array.isArray(data.domains)
-    ) {
-
-      for (const domain of data.domains) {
-
-        const cleaned = cleanDomain(domain);
-
-        if (
-          cleaned &&
-          !result.includes(cleaned)
-        ) {
-          result.push(cleaned);
+            return;
         }
 
-      }
-    }
-
-    return result;
-  }
-
-
-  /*
-   * ==========================================================
-   * STREAM API
-   *
-   * Probeert iedere mirror totdat er eentje werkt.
-   * ==========================================================
-   */
-
-  async function getStreams() {
-
-    let lastError = null;
-
-    for (const domain of domains) {
-
-      try {
-
-        const url = makeUrl(
-          domain,
-          STREAMS_PATH
-        );
-
-        console.log(
-          "Streams proberen:",
-          url
-        );
-
-        const response = await fetch(
-          url,
-          {
-            method: "GET",
-            headers: {
-              "Accept": "application/json"
-            },
-            cache: "no-store"
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `HTTP ${response.status}`
-          );
-        }
-
-        const data = await response.json();
-
-        const result = extractStreams(data);
-
-        if (!Array.isArray(result)) {
-          throw new Error(
-            "Ongeldige stream response"
-          );
-        }
-
-        return {
-          domain,
-          streams: result
-        };
-
-      } catch (error) {
-
-        console.warn(
-          `Mirror ${domain} werkt niet:`,
-          error
-        );
-
-        lastError = error;
-      }
-    }
-
-    throw lastError ||
-      new Error("Geen werkende API mirror gevonden.");
-  }
-
-
-  /*
-   * ==========================================================
-   * JSON STRUCTUREN
-   * ==========================================================
-   */
-
-  function extractStreams(data) {
-
-    if (Array.isArray(data)) {
-      return data;
-    }
-
-    if (!data || typeof data !== "object") {
-      return [];
-    }
-
-    const possibleKeys = [
-      "streams",
-      "data",
-      "results",
-      "events",
-      "channels",
-      "items"
-    ];
-
-    for (const key of possibleKeys) {
-
-      if (Array.isArray(data[key])) {
-        return data[key];
-      }
-
-    }
-
-    return [];
-  }
-
-
-  function normalize(stream) {
-
-    const title = getValue(stream, [
-      "title",
-      "name",
-      "event",
-      "event_name",
-      "channel_name",
-      "label"
-    ]) || "Onbekende stream";
-
-
-    const category = getValue(stream, [
-      "category",
-      "sport",
-      "type",
-      "league",
-      "competition"
-    ]) || "Overig";
-
-
-    const image = getValue(stream, [
-      "thumbnail",
-      "thumbnail_url",
-      "image",
-      "image_url",
-      "logo",
-      "poster"
-    ]);
-
-
-    const url = getValue(stream, [
-      "url",
-      "stream_url",
-      "stream",
-      "link",
-      "embed",
-      "embed_url",
-      "m3u8",
-      "source"
-    ]);
-
-
-    const searchable = (
-      title +
-      " " +
-      category +
-      " " +
-      JSON.stringify(stream)
-    ).toLowerCase();
-
-
-    const f1 =
-      searchable.includes("f1") ||
-      searchable.includes("formula 1") ||
-      searchable.includes("formula1") ||
-      searchable.includes("formula one");
-
-
-    return {
-      raw: stream,
-      title: String(title),
-      category: String(category),
-      image: image ? String(image) : "",
-      url: url ? String(url) : "",
-      f1
-    };
-  }
-
-
-  /*
-   * ==========================================================
-   * HTML
-   * ==========================================================
-   */
-
-  function escapeHtml(value) {
-
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-
-  function createCard(stream) {
-
-    const image = stream.image
-      ? `
-        <img
-          src="${escapeHtml(stream.image)}"
-          loading="lazy"
-          alt="">
-      `
-      : "";
-
-
-    return `
-      <article
-        class="card"
-        data-index="${streams.indexOf(stream)}"
-        onclick="openStreamByIndex(${streams.indexOf(stream)})">
-
-        <div class="thumbnail">
-
-          ${image}
-
-          <span class="live">
-            LIVE
-          </span>
-
-        </div>
-
-        <div class="card-content">
-
-          <div class="title">
-            ${escapeHtml(stream.title)}
-          </div>
-
-          <div class="category">
-            ${escapeHtml(stream.category)}
-          </div>
-
-        </div>
-
-      </article>
-    `;
-  }
-
-
-  function render(list) {
-
-    const content =
-      document.getElementById("content");
-
-
-    if (!list.length) {
-
-      content.innerHTML = `
-        <div class="empty">
-          Geen streams gevonden.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const groups = {};
-
-
-    for (const stream of list) {
-
-      const category =
-        stream.f1
-          ? "Formula 1"
-          : stream.category || "Overig";
-
-
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-
-
-      groups[category].push(stream);
-    }
-
-
-    const categories =
-      Object.keys(groups).sort((a, b) => {
-
-        if (a === "Formula 1") {
-          return -1;
-        }
-
-        if (b === "Formula 1") {
-          return 1;
-        }
-
-        return a.localeCompare(b);
-      });
-
-
-    content.innerHTML =
-      categories.map(category => {
-
-        const items =
-          groups[category];
-
-
-        return `
-          <section class="section">
-
-            <div class="section-header">
-
-              <div class="section-title">
-                ${escapeHtml(category)}
-              </div>
-
-              <div class="count">
-                ${items.length}
-                ${items.length === 1
-                  ? "stream"
-                  : "streams"}
-              </div>
-
-            </div>
-
-            <div class="grid">
-              ${items.map(createCard).join("")}
-            </div>
-
-          </section>
-        `;
-
-      }).join("");
-  }
-
-
-  /*
-   * ==========================================================
-   * PLAYER
-   * ==========================================================
-   */
-
-  function openStreamByIndex(index) {
-
-    const stream = streams[index];
-
-    if (!stream) {
-      return;
-    }
-
-    openStream(stream);
-  }
-
-
-  function openStream(stream) {
-
-    if (!stream.url) {
-
-      alert(
-        "Voor deze stream is geen URL gevonden."
-      );
-
-      return;
-    }
-
-
-    const overlay =
-      document.getElementById("overlay");
-
-    const video =
-      document.getElementById("video");
-
-    const iframe =
-      document.getElementById("iframe");
-
-    const title =
-      document.getElementById("playerTitle");
-
-
-    title.textContent = stream.title;
-
-
-    video.pause();
-    video.removeAttribute("src");
-
-    iframe.src = "";
-
-
-    video.style.display = "none";
-    iframe.style.display = "none";
-
-
-    const url = stream.url.toLowerCase();
-
-
-    /*
-     * MP4/WebM/Ogg
-     */
-
-    if (
-      url.includes(".mp4") ||
-      url.includes(".webm") ||
-      url.includes(".ogg")
-    ) {
-
-      video.src = stream.url;
-      video.style.display = "block";
-
-      video.play().catch(() => {});
-
-
-    /*
-     * HLS
-     *
-     * Moderne browsers zoals Safari kunnen
-     * dit native afspelen.
-     */
-
-    } else if (
-      url.includes(".m3u8")
-    ) {
-
-      video.src = stream.url;
-      video.style.display = "block";
-
-      video.play().catch(() => {});
-
-
-    /*
-     * Anders behandelen als embed URL.
-     */
-
-    } else {
-
-      iframe.src = stream.url;
-      iframe.style.display = "block";
-    }
-
-
-    overlay.classList.add("active");
-  }
-
-
-  function closePlayer() {
-
-    const overlay =
-      document.getElementById("overlay");
-
-    const video =
-      document.getElementById("video");
-
-    const iframe =
-      document.getElementById("iframe");
-
-
-    video.pause();
-    video.removeAttribute("src");
-
-    iframe.src = "";
-
-    overlay.classList.remove("active");
-  }
-
-
-  /*
-   * ==========================================================
-   * SEARCH
-   * ==========================================================
-   */
-
-  document
-    .getElementById("search")
-    .addEventListener("input", event => {
-
-      const query =
-        event.target.value
-          .trim()
-          .toLowerCase();
-
-
-      if (!query) {
-
-        render(streams);
-
-        return;
-      }
-
-
-      const filtered =
-        streams.filter(stream => {
-
-          return (
-            stream.title
-              .toLowerCase()
-              .includes(query) ||
-
-            stream.category
-              .toLowerCase()
-              .includes(query) ||
-
-            JSON.stringify(stream.raw)
-              .toLowerCase()
-              .includes(query)
-          );
-
+        streams.forEach(stream => {
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const start = stream.starts_at
+                ? new Date(stream.starts_at * 1000)
+                : null;
+
+            const end = stream.ends_at
+                ? new Date(stream.ends_at * 1000)
+                : null;
+
+            const now = Date.now();
+
+            const isLive =
+                stream.always_live === 1 ||
+                (start && end &&
+                 now >= start.getTime() &&
+                 now <= end.getTime());
+
+            card.innerHTML = `
+                ${
+                    stream.poster
+                    ? `<img
+                        class="poster"
+                        src="${escapeAttribute(stream.poster)}"
+                        alt=""
+                        loading="lazy"
+                      >`
+                    : `<div class="poster"></div>`
+                }
+
+                <div class="info">
+                    <div class="name">
+                        ${escapeHtml(stream.name || "F1 Stream")}
+                    </div>
+
+                    <div class="tag">
+                        ${escapeHtml(stream.tag || "Formula 1")}
+                    </div>
+
+                    ${
+                        isLive
+                        ? `<div class="live">● LIVE</div>`
+                        : ""
+                    }
+                </div>
+            `;
+
+            card.addEventListener("click", () => {
+                openPlayer(stream);
+            });
+
+            streamsContainer.appendChild(card);
         });
+    }
 
 
-      render(filtered);
+    function openPlayer(stream) {
+
+        playerTitle.textContent =
+            stream.name || "F1 Live";
+
+        frameContainer.innerHTML = "";
+
+        if (!stream.iframe) {
+
+            frameContainer.innerHTML = `
+                <div class="no-embed">
+                    Voor deze stream is geen embed beschikbaar.
+                </div>
+            `;
+
+        } else {
+
+            /*
+             * De API levert zelf de iframe.
+             * Deze wordt rechtstreeks weergegeven zonder
+             * de embed-instellingen aan te passen.
+             */
+            frameContainer.innerHTML = stream.iframe;
+        }
+
+        player.style.display = "block";
+        document.body.style.overflow = "hidden";
+    }
+
+
+    function closePlayerWindow() {
+
+        player.style.display = "none";
+        frameContainer.innerHTML = "";
+        document.body.style.overflow = "";
+    }
+
+
+    closePlayer.addEventListener(
+        "click",
+        closePlayerWindow
+    );
+
+
+    document.addEventListener("keydown", event => {
+
+        if (event.key === "Escape") {
+            closePlayerWindow();
+        }
+
     });
 
 
-  /*
-   * ==========================================================
-   * KEYBOARD / OVERLAY
-   * ==========================================================
-   */
+    function escapeHtml(value) {
 
-  document
-    .getElementById("overlay")
-    .addEventListener("click", event => {
-
-      if (
-        event.target.id === "overlay"
-      ) {
-        closePlayer();
-      }
-
-    });
-
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Escape") {
-        closePlayer();
-      }
-
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
-  );
 
 
-  /*
-   * ==========================================================
-   * INITIAL LOAD
-   * ==========================================================
-   */
+    function escapeAttribute(value) {
 
-  async function init() {
-
-    const status =
-      document.getElementById("status");
-
-    const error =
-      document.getElementById("error");
-
-
-    try {
-
-      status.textContent =
-        "API mirrors ophalen...";
-
-
-      /*
-       * 1. Eerst /api/ping
-       */
-
-      domains =
-        await getDomains();
-
-
-      status.textContent =
-        `${domains.length} API mirror(s) gevonden. Streams ophalen...`;
-
-
-      /*
-       * 2. Daarna /api/streams
-       */
-
-      const result =
-        await getStreams();
-
-
-      /*
-       * 3. Normaliseren
-       */
-
-      streams =
-        result.streams
-          .map(normalize);
-
-
-      /*
-       * F1 bovenaan
-       */
-
-      streams.sort((a, b) => {
-
-        if (a.f1 && !b.f1) {
-          return -1;
-        }
-
-        if (!a.f1 && b.f1) {
-          return 1;
-        }
-
-        return a.title.localeCompare(
-          b.title,
-          undefined,
-          {
-            sensitivity: "base"
-          }
-        );
-
-      });
-
-
-      /*
-       * 4. Render
-       */
-
-      render(streams);
-
-
-      status.textContent =
-        `${streams.length} streams geladen via ${result.domain}`;
-
-
-    } catch (err) {
-
-      console.error(err);
-
-
-      status.textContent =
-        "Verbinding mislukt";
-
-
-      error.textContent =
-        "Streams konden niet worden geladen: " +
-        err.message;
-
-
-      error.style.display =
-        "block";
-
-
-      document.getElementById("content")
-        .innerHTML = `
-          <div class="empty">
-            Geen verbinding met de stream API.
-          </div>
-        `;
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
     }
-  }
 
 
-  /*
-   * Start
-   */
+    // Eerste keer laden
+    loadStreams();
 
-  init();
-
-
-  /*
-   * Iedere minuut opnieuw controleren.
-   *
-   * Hierdoor worden ook gewijzigde mirrors
-   * uit /api/ping automatisch opgehaald.
-   */
-
-  setInterval(
-    init,
-    60 * 1000
-  );
+    // Volgens de API-documentatie ongeveer iedere minuut verversen
+    setInterval(loadStreams, 60 * 1000);
 
 </script>
 
 </body>
 </html>
-```
