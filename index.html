@@ -36,17 +36,7 @@ button{font:inherit}
 .empty{padding:38px 20px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
 .error{display:none;margin-top:25px;padding:13px 15px;border-radius:10px;background:#250909;border:1px solid #5a1717;color:#ffaaa7}
 footer{text-align:center;color:#555;font-size:12px;padding:0 20px 28px}
-.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);backdrop-filter:blur(9px);padding:20px;align-items:center;justify-content:center}
-.overlay.open{display:flex}
-.player{width:min(1200px,100%);background:#080808;border:1px solid #292929;border-radius:15px;overflow:hidden}
-.playerbar{height:58px;padding:10px 14px 10px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #222}
-.playername{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:15px}
-.close{width:36px;height:36px;border:0;border-radius:9px;background:#1b1b1b;color:#fff;font-size:21px;cursor:pointer}
-.frame-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000}
-.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-.player-error{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#aaa;background:#080808}
-.player-error strong{display:block;color:#fff;margin-bottom:8px}
-@media(max-width:600px){.header{padding:14px 15px}main{padding:25px 15px 35px}.grid{grid-template-columns:1fr}.overlay{padding:8px}}
+.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);backdrop-filter:blur(9px);padding:12px;align-items:center;justify-content:center}.overlay.open{display:flex}.player{width:min(1280px,100%);max-height:calc(100vh - 24px);background:#080808;border:1px solid #292929;border-radius:15px;overflow:hidden;display:flex;flex-direction:column}.playerbar{min-height:58px;padding:10px 12px 10px 17px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #222;flex-shrink:0}.playername{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px;flex:1;min-width:0}.player-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.player-btn,.close{height:36px;border:0;border-radius:9px;background:#1b1b1b;color:#fff;padding:0 11px;font-weight:700;cursor:pointer;white-space:nowrap}.player-btn:hover,.close:hover{background:#292929}.close{width:36px;padding:0;font-size:21px}.frame-wrap{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(100vh - 105px);background:#000;flex-shrink:1;overflow:hidden}.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.player-error{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#aaa;background:#080808}.player-error strong{display:block;color:#fff;margin-bottom:8px}.stream-select{height:36px;max-width:230px;border:1px solid #333;border-radius:9px;background:#151515;color:#fff;padding:0 9px;font:inherit;font-size:13px;font-weight:700}@media(max-width:700px){.header{padding:14px 15px}main{padding:25px 15px 35px}.grid{grid-template-columns:1fr}.overlay{padding:6px}.player{max-height:calc(100vh - 12px);border-radius:10px}.playerbar{padding:8px;gap:6px;flex-wrap:wrap}.playername{width:100%;flex-basis:100%;order:0}.player-actions{width:100%;order:1}.player-btn,.close,.stream-select{height:34px}.stream-select{max-width:none;flex:1}.frame-wrap{aspect-ratio:16/9;max-height:calc(100vh - 125px)}}
 </style>
 </head>
 <body>
@@ -87,7 +77,11 @@ footer{text-align:center;color:#555;font-size:12px;padding:0 20px 28px}
   <div class="player">
     <div class="playerbar">
       <div id="playerName" class="playername">F1</div>
-      <button id="close" class="close" type="button" aria-label="Sluiten">×</button>
+      <div class="player-actions">
+        <select id="streamSelect" class="stream-select" aria-label="Kies stream"></select>
+        <button id="fullscreen" class="player-btn" type="button">⛶ Fullscreen</button>
+        <button id="close" class="close" type="button" aria-label="Leave / Sluiten">×</button>
+      </div>
     </div>
     <div id="frameWrap" class="frame-wrap"></div>
   </div>
@@ -109,6 +103,9 @@ const errorBox = $("error");
 const overlay = $("overlay");
 const frameWrap = $("frameWrap");
 const playerName = $("playerName");
+const streamSelect = $("streamSelect");
+const fullscreenButton = $("fullscreen");
+let playerStreams = [];
 
 function dateMs(v){
   if(v === undefined || v === null || v === "") return NaN;
@@ -198,41 +195,28 @@ function makeIframe(value, title){
   }
 }
 
-function openPlayer(stream){
-  playerName.textContent = stream.name || "F1";
-  frameWrap.replaceChildren();
-
-  const frame = makeIframe(stream.iframe, stream.name || "F1");
-
-  if(frame){
-    frameWrap.appendChild(frame);
-  }else{
-    const box = document.createElement("div");
-    box.className = "player-error";
-
-    const inner = document.createElement("div");
-    const strong = document.createElement("strong");
-    strong.textContent = "Geen geldige embed ontvangen.";
-    const text = document.createElement("span");
-    text.textContent = "De API heeft voor deze stream geen bruikbare iframe-URL teruggegeven.";
-
-    inner.appendChild(strong);
-    inner.appendChild(text);
-    box.appendChild(inner);
-    frameWrap.appendChild(box);
-  }
-
-  overlay.classList.add("open");
-  document.body.style.overflow = "hidden";
+function streamLabel(stream){
+  const text=[stream.name,stream.title,stream.language,stream.lang,stream.tag,stream.category_name].filter(Boolean).join(" ").toLowerCase();
+  if(/(^|[\s\-_])(nl|nederlands|dutch)([\s\-_]|$)/i.test(text)) return "🇳🇱 Nederlands";
+  if(/(^|[\s\-_])(en|eng|english)([\s\-_]|$)/i.test(text)) return "🇬🇧 English";
+  return stream.name || "F1 stream";
 }
-
-function closePlayer(){
-  overlay.classList.remove("open");
-  frameWrap.replaceChildren();
-  document.body.style.overflow = "";
+function fillStreamSelect(stream,streams){
+  playerStreams=streams&&streams.length?streams:[stream]; streamSelect.replaceChildren();
+  playerStreams.forEach((item,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=streamLabel(item);streamSelect.appendChild(o);});
+  streamSelect.value=String(Math.max(0,playerStreams.indexOf(stream))); streamSelect.style.display=playerStreams.length>1?"block":"none";
 }
+function setPlayerStream(stream){
+  playerName.textContent=stream.name||"F1"; frameWrap.replaceChildren();
+  const frame=makeIframe(stream.iframe,stream.name||"F1");
+  if(frame) frameWrap.appendChild(frame); else {const box=document.createElement("div");box.className="player-error";const inner=document.createElement("div");const strong=document.createElement("strong");strong.textContent="Geen geldige embed ontvangen.";const text=document.createElement("span");text.textContent="De API heeft voor deze stream geen bruikbare iframe-URL teruggegeven.";inner.append(strong,text);box.appendChild(inner);frameWrap.appendChild(box);}
+}
+function openPlayer(stream,allLiveStreams=[]){fillStreamSelect(stream,allLiveStreams.length?allLiveStreams:[stream]);setPlayerStream(stream);overlay.classList.add("open");document.body.style.overflow="hidden";}
+function closePlayer(){overlay.classList.remove("open");frameWrap.replaceChildren();playerStreams=[];document.body.style.overflow="";if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});}
+async function toggleFullscreen(){try{if(document.fullscreenElement) await document.exitFullscreen();else await document.querySelector(".player").requestFullscreen();}catch(err){console.warn("Fullscreen niet beschikbaar",err);}}
+function updateFullscreenButton(){fullscreenButton.textContent=document.fullscreenElement?"⛶ Exit fullscreen":"⛶ Fullscreen";}
 
-function card(stream,isLive){
+function card(stream,isLive,liveStreams=[]){
   const article = document.createElement("article");
   article.className = "card";
 
@@ -279,7 +263,7 @@ function card(stream,isLive){
   button.className = "watch" + (isLive ? " live-btn" : "");
   button.type = "button";
   button.textContent = isLive ? "Kijk live" : "Open stream";
-  button.addEventListener("click", () => openPlayer(stream));
+  button.addEventListener("click", () => openPlayer(stream,isLive?liveStreams:[stream]));
 
   body.append(title,time,button);
   article.append(poster,body);
@@ -306,7 +290,7 @@ function render(streams){
   upcomingCount.textContent = upcomingStreams.length + (upcomingStreams.length === 1 ? " stream" : " streams");
 
   if(liveStreams.length === 0) empty(liveGrid,"Er is momenteel geen F1-sessie live.");
-  else liveStreams.forEach(s => liveGrid.appendChild(card(s,true)));
+  else liveStreams.forEach(s => liveGrid.appendChild(card(s,true,liveStreams)));
 
   if(upcomingStreams.length === 0) empty(upcomingGrid,"Geen aankomende F1-sessies gevonden.");
   else upcomingStreams.forEach(s => upcomingGrid.appendChild(card(s,false)));
@@ -351,10 +335,17 @@ async function load(){
 }
 
 $("close").addEventListener("click",closePlayer);
+fullscreenButton.addEventListener("click",toggleFullscreen);
+streamSelect.addEventListener("change",e=>{const i=Number(e.target.value);if(playerStreams[i])setPlayerStream(playerStreams[i]);});
+document.addEventListener("fullscreenchange",updateFullscreenButton);
 overlay.addEventListener("click",e => { if(e.target === overlay) closePlayer(); });
 document.addEventListener("keydown",e => { if(e.key === "Escape") closePlayer(); });
 
 load();
+setInterval(load,REFRESH_MS);
+</script>
+</body>
+</html>
 setInterval(load,REFRESH_MS);
 </script>
 </body>
