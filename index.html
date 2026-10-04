@@ -1,377 +1,361 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>F1 Live</title>
 <style>
 *{box-sizing:border-box}
-:root{--bg:#070707;--card:#111;--border:#242424;--text:#fff;--muted:#929292;--red:#e10600;--green:#20c76a}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{position:sticky;top:0;z-index:20;background:rgba(7,7,7,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
-.header-inner{max-width:1400px;margin:auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}
-.logo-mark{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;font-weight:900;font-size:17px}
+:root{--bg:#070707;--panel:#111;--line:#242424;--text:#fff;--muted:#929292;--red:#e10600;--green:#20c76a}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+header{position:sticky;top:0;z-index:10;background:rgba(7,7,7,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.header{max-width:1400px;margin:auto;padding:17px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:800}
+.logo b{display:grid;place-items:center;width:35px;height:35px;border-radius:9px;background:var(--red);font-size:14px}
 .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(32,199,106,.7)}
-main{max-width:1400px;margin:auto;padding:30px 24px 70px}
-.hero{margin-bottom:30px}.hero h1{margin:0 0 8px;font-size:clamp(30px,5vw,52px);line-height:1;letter-spacing:-1.5px}.hero p{margin:0;color:var(--muted)}
-.section{margin-top:35px}.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
-.section-title{margin:0;font-size:20px;font-weight:800}.count{color:var(--muted);font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(32,199,106,.7)}
+main{max-width:1400px;margin:auto;padding:32px 24px 40px}
+h1{margin:0 0 8px;font-size:clamp(34px,5vw,54px);line-height:1;letter-spacing:-1.5px}
+.subtitle{margin:0;color:var(--muted)}
+.section{margin-top:36px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+h2{margin:0;font-size:20px}.count{font-size:13px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
-.card{overflow:hidden;background:var(--card);border:1px solid var(--border);border-radius:16px;transition:.15s}
-.card:hover{transform:translateY(-2px);background:#171717;border-color:#353535}
-.poster{position:relative;aspect-ratio:16/9;background:#0c0c0c;overflow:hidden}.poster img{width:100%;height:100%;object-fit:cover;display:block}
-.poster-placeholder{width:100%;height:100%;display:grid;place-items:center;color:#444;font-size:42px;font-weight:900}
-.badge{position:absolute;top:12px;left:12px;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
-.badge-live{background:var(--red);color:#fff}.badge-upcoming{background:rgba(0,0,0,.75);color:#fff;border:1px solid rgba(255,255,255,.15)}
-.card-body{padding:16px}.card-title{margin:0 0 7px;font-size:17px;font-weight:750;line-height:1.25}.card-time{color:var(--muted);font-size:13px}
-.watch-btn{width:100%;margin-top:15px;padding:11px 14px;border:0;border-radius:9px;background:#fff;color:#000;font-size:14px;font-weight:800;cursor:pointer}
-.watch-btn:hover{opacity:.85}.watch-btn.live{background:var(--red);color:#fff}
-.empty{padding:45px 20px;border:1px dashed var(--border);border-radius:14px;text-align:center;color:var(--muted)}
-.error{margin-bottom:25px;padding:14px 16px;border-radius:10px;background:rgba(225,6,0,.12);border:1px solid rgba(225,6,0,.35);color:#ff9b98;display:none}
-.player-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.86);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
-.player-overlay.open{display:flex}.player-window{width:min(1200px,100%);max-height:95vh;background:#080808;border:1px solid #282828;border-radius:16px;overflow:hidden;box-shadow:0 30px 100px rgba(0,0,0,.7)}
-.player-header{min-height:58px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:15px;border-bottom:1px solid #222}
-.player-title{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.close-btn{flex:0 0 auto;width:36px;height:36px;border:0;border-radius:9px;background:#1c1c1c;color:#fff;cursor:pointer;font-size:20px}
-.player-container{position:relative;width:100%;aspect-ratio:16/9;background:#000}.player-container iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000}
-.player-message{position:absolute;inset:0;display:grid;place-items:center;padding:30px;text-align:center;background:#080808;color:var(--muted)}
-.player-message-inner{max-width:500px}.player-message strong{display:block;margin-bottom:8px;color:#fff;font-size:18px}
-.player-message code{display:block;margin-top:12px;padding:10px;border-radius:8px;background:#111;color:#aaa;font-size:12px;word-break:break-all}
-@media(max-width:600px){.header-inner{padding:15px}main{padding:25px 15px 60px}.grid{grid-template-columns:1fr}.player-overlay{padding:8px}.player-window{border-radius:10px}}
+.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:16px;transition:.15s}
+.card:hover{transform:translateY(-2px);border-color:#383838}
+.poster{position:relative;aspect-ratio:16/9;background:#0c0c0c}
+.poster img{width:100%;height:100%;object-fit:cover;display:block}
+.poster-fallback{width:100%;height:100%;display:grid;place-items:center;font-size:42px;font-weight:900;color:#3e3e3e}
+.badge{position:absolute;top:12px;left:12px;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase}
+.live{background:var(--red);color:#fff}.upcoming{background:rgba(0,0,0,.75);color:#fff;border:1px solid #444}
+.body{padding:16px}.title{margin:0 0 7px;font-size:17px;line-height:1.25}.time{font-size:13px;color:var(--muted)}
+button{font:inherit}
+.watch{width:100%;margin-top:15px;border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#000;font-weight:800;cursor:pointer}
+.watch.live-btn{background:var(--red);color:#fff}
+.empty{padding:38px 20px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
+.error{display:none;margin-top:25px;padding:13px 15px;border-radius:10px;background:#250909;border:1px solid #5a1717;color:#ffaaa7}
+footer{text-align:center;color:#555;font-size:12px;padding:0 20px 28px}
+.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);backdrop-filter:blur(9px);padding:20px;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.player{width:min(1200px,100%);background:#080808;border:1px solid #292929;border-radius:15px;overflow:hidden}
+.playerbar{height:58px;padding:10px 14px 10px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #222}
+.playername{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:15px}
+.close{width:36px;height:36px;border:0;border-radius:9px;background:#1b1b1b;color:#fff;font-size:21px;cursor:pointer}
+.frame-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000}
+.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.player-error{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#aaa;background:#080808}
+.player-error strong{display:block;color:#fff;margin-bottom:8px}
+@media(max-width:600px){.header{padding:14px 15px}main{padding:25px 15px 35px}.grid{grid-template-columns:1fr}.overlay{padding:8px}}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="header-inner">
-    <div class="logo"><div class="logo-mark">F1</div><span>F1 Live</span></div>
-    <div class="status"><span class="status-dot"></span><span id="statusText">Verbinden...</span></div>
+  <div class="header">
+    <div class="logo"><b>F1</b><span>F1 Live</span></div>
+    <div class="status"><span class="dot"></span><span id="status">Verbinden...</span></div>
   </div>
 </header>
 
 <main>
-  <section class="hero">
-    <h1>Formula 1</h1>
-    <p>Live en aankomende sessies</p>
-  </section>
+  <h1>Formula 1</h1>
+  <p class="subtitle">Live en aankomende sessies</p>
 
   <div id="error" class="error"></div>
 
   <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Live</h2>
-      <span class="count" id="liveCount">0 streams</span>
+    <div class="section-head">
+      <h2>Live</h2>
+      <span id="liveCount" class="count">0 streams</span>
     </div>
     <div id="liveGrid" class="grid"></div>
   </section>
 
   <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Upcoming</h2>
-      <span class="count" id="upcomingCount">0 streams</span>
+    <div class="section-head">
+      <h2>Upcoming</h2>
+      <span id="upcomingCount" class="count">0 streams</span>
     </div>
     <div id="upcomingGrid" class="grid"></div>
   </section>
 </main>
 
-<div id="playerOverlay" class="player-overlay">
-  <div class="player-window">
-    <div class="player-header">
-      <div id="playerTitle" class="player-title">F1</div>
-      <button id="closePlayer" class="close-btn" type="button" aria-label="Sluiten">×</button>
+<footer>Gemaakt door een onafhankelijke maker uit Meppel.</footer>
+
+<div id="overlay" class="overlay">
+  <div class="player">
+    <div class="playerbar">
+      <div id="playerName" class="playername">F1</div>
+      <button id="close" class="close" type="button" aria-label="Sluiten">×</button>
     </div>
-    <div id="playerContainer" class="player-container"></div>
+    <div id="frameWrap" class="frame-wrap"></div>
   </div>
 </div>
 
 <script>
 "use strict";
 
-const API_URL = "https://api.ppv.st/api/streams";
-const REFRESH_INTERVAL = 60000;
+const API = "https://api.ppv.st/api/streams";
+const REFRESH_MS = 60000;
 
-const liveGrid = document.getElementById("liveGrid");
-const upcomingGrid = document.getElementById("upcomingGrid");
-const liveCount = document.getElementById("liveCount");
-const upcomingCount = document.getElementById("upcomingCount");
-const statusText = document.getElementById("statusText");
-const errorBox = document.getElementById("error");
-const playerOverlay = document.getElementById("playerOverlay");
-const playerContainer = document.getElementById("playerContainer");
-const playerTitle = document.getElementById("playerTitle");
-const closePlayer = document.getElementById("closePlayer");
+const $ = id => document.getElementById(id);
+const liveGrid = $("liveGrid");
+const upcomingGrid = $("upcomingGrid");
+const liveCount = $("liveCount");
+const upcomingCount = $("upcomingCount");
+const status = $("status");
+const errorBox = $("error");
+const overlay = $("overlay");
+const frameWrap = $("frameWrap");
+const playerName = $("playerName");
 
-function formatDate(value) {
-  if (!value) return "Tijd onbekend";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Tijd onbekend";
-  return new Intl.DateTimeFormat("nl-NL", {
-    dateStyle: "medium",
-    timeStyle: "short"
-  }).format(date);
+function dateMs(v){
+  if(v === undefined || v === null || v === "") return NaN;
+  const n = Number(v);
+  if(Number.isFinite(n)){
+    return n < 100000000000 ? n * 1000 : n;
+  }
+  const d = Date.parse(v);
+  return Number.isNaN(d) ? NaN : d;
 }
 
-function isLive(stream) {
-  if (stream.always_live === true) return true;
-  const now = Date.now();
-  const start = stream.starts_at ? new Date(stream.starts_at).getTime() : NaN;
-  const end = stream.ends_at ? new Date(stream.ends_at).getTime() : NaN;
-  if (Number.isNaN(start) || start > now) return false;
-  return Number.isNaN(end) || now < end;
+function formatTime(v){
+  const ms = dateMs(v);
+  if(!Number.isFinite(ms)) return "Tijd onbekend";
+  return new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(ms));
 }
 
-function isUpcoming(stream) {
-  if (stream.always_live === true || !stream.starts_at) return false;
-  const start = new Date(stream.starts_at).getTime();
-  return !Number.isNaN(start) && start > Date.now();
-}
-
-function isPast(stream) {
-  if (stream.always_live === true || !stream.ends_at) return false;
-  const end = new Date(stream.ends_at).getTime();
-  return !Number.isNaN(end) && end <= Date.now();
-}
-
-function isF1(stream) {
-  const text = [
+function f1(stream){
+  const s = [
     stream.name,
     stream.tag,
-    stream.category_name,
-    stream.category
+    stream.category,
+    stream.category_name
   ].filter(Boolean).join(" ").toLowerCase();
-
-  return text.includes("formula 1") ||
-         text.includes("formula1") ||
-         /\bf1\b/.test(text);
+  return s.includes("formula 1") || s.includes("formula1") || /\bf1\b/.test(s);
 }
 
-/* Accepts either a complete <iframe>...</iframe> or a plain URL. */
-function createEmbed(value, title) {
-  if (typeof value !== "string") return null;
+function live(stream){
+  if(stream.always_live === true || Number(stream.always_live) === 1) return true;
+  const now = Date.now();
+  const start = dateMs(stream.starts_at);
+  const end = dateMs(stream.ends_at);
+  return Number.isFinite(start) && start <= now && (!Number.isFinite(end) || end > now);
+}
+
+function upcoming(stream){
+  if(stream.always_live === true || Number(stream.always_live) === 1) return false;
+  const start = dateMs(stream.starts_at);
+  return Number.isFinite(start) && start > Date.now();
+}
+
+function past(stream){
+  if(stream.always_live === true || Number(stream.always_live) === 1) return false;
+  const end = dateMs(stream.ends_at);
+  return Number.isFinite(end) && end <= Date.now();
+}
+
+/*
+ * The API documents iframe as a string. This function supports
+ * both a plain URL and a complete iframe element.
+ */
+function makeIframe(value, title){
+  if(typeof value !== "string") return null;
   const raw = value.trim();
-  if (!raw) return null;
+  if(!raw) return null;
 
-  if (/<iframe[\s>]/i.test(raw)) {
-    const doc = new DOMParser().parseFromString(raw, "text/html");
-    const source = doc.querySelector("iframe");
-    if (!source) return null;
+  if(/<iframe[\s>]/i.test(raw)){
+    const parsed = new DOMParser().parseFromString(raw,"text/html");
+    const source = parsed.querySelector("iframe");
+    if(!source) return null;
 
-    const iframe = document.createElement("iframe");
-    iframe.src = source.getAttribute("src") || "";
-    iframe.title = source.getAttribute("title") || title || "F1 stream";
-    iframe.allow = source.getAttribute("allow") ||
-      "autoplay; fullscreen; picture-in-picture";
-    iframe.allowFullscreen = true;
-    iframe.referrerPolicy =
-      source.getAttribute("referrerpolicy") ||
-      "strict-origin-when-cross-origin";
+    const src = source.getAttribute("src");
+    if(!src) return null;
 
-    return iframe.src ? iframe : null;
+    const frame = document.createElement("iframe");
+    frame.src = src;
+    frame.title = source.getAttribute("title") || title || "F1";
+    frame.allow = source.getAttribute("allow") || "autoplay; fullscreen; picture-in-picture";
+    frame.referrerPolicy = source.getAttribute("referrerpolicy") || "strict-origin-when-cross-origin";
+    frame.allowFullscreen = true;
+    return frame;
   }
 
-  try {
-    const url = new URL(raw, window.location.href);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  try{
+    const url = new URL(raw, location.href);
+    if(!["http:","https:"].includes(url.protocol)) return null;
 
-    const iframe = document.createElement("iframe");
-    iframe.src = url.href;
-    iframe.title = title || "F1 stream";
-    iframe.allow = "autoplay; fullscreen; picture-in-picture";
-    iframe.allowFullscreen = true;
-    iframe.referrerPolicy = "strict-origin-when-cross-origin";
-    return iframe;
-  } catch {
+    const frame = document.createElement("iframe");
+    frame.src = url.href;
+    frame.title = title || "F1";
+    frame.allow = "autoplay; fullscreen; picture-in-picture";
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.allowFullscreen = true;
+    return frame;
+  }catch{
     return null;
   }
 }
 
-function showPlayer(stream) {
-  playerTitle.textContent = stream.name || "F1 stream";
-  playerContainer.replaceChildren();
+function openPlayer(stream){
+  playerName.textContent = stream.name || "F1";
+  frameWrap.replaceChildren();
 
-  const iframe = createEmbed(stream.iframe, stream.name || "F1 stream");
+  const frame = makeIframe(stream.iframe, stream.name || "F1");
 
-  if (!iframe) {
-    const message = document.createElement("div");
-    message.className = "player-message";
+  if(frame){
+    frameWrap.appendChild(frame);
+  }else{
+    const box = document.createElement("div");
+    box.className = "player-error";
 
     const inner = document.createElement("div");
-    inner.className = "player-message-inner";
+    const strong = document.createElement("strong");
+    strong.textContent = "Geen geldige embed ontvangen.";
+    const text = document.createElement("span");
+    text.textContent = "De API heeft voor deze stream geen bruikbare iframe-URL teruggegeven.";
 
-    const title = document.createElement("strong");
-    title.textContent = "Geen geldige embed beschikbaar";
-
-    const text = document.createElement("div");
-    text.textContent = "Deze stream heeft geen bruikbare iframe-URL aangeleverd.";
-
-    inner.append(title, text);
-    message.appendChild(inner);
-    playerContainer.appendChild(message);
-  } else {
-    playerContainer.appendChild(iframe);
+    inner.appendChild(strong);
+    inner.appendChild(text);
+    box.appendChild(inner);
+    frameWrap.appendChild(box);
   }
 
-  playerOverlay.classList.add("open");
+  overlay.classList.add("open");
   document.body.style.overflow = "hidden";
 }
 
-function closePlayerWindow() {
-  playerOverlay.classList.remove("open");
+function closePlayer(){
+  overlay.classList.remove("open");
+  frameWrap.replaceChildren();
   document.body.style.overflow = "";
-  playerContainer.replaceChildren();
 }
 
-function createCard(stream, live) {
-  const card = document.createElement("article");
-  card.className = "card";
+function card(stream,isLive){
+  const article = document.createElement("article");
+  article.className = "card";
 
   const poster = document.createElement("div");
   poster.className = "poster";
 
-  if (stream.poster) {
+  if(stream.poster){
     const img = document.createElement("img");
     img.src = stream.poster;
     img.alt = stream.name || "F1";
     img.loading = "lazy";
-
     img.onerror = () => {
       img.remove();
-      const placeholder = document.createElement("div");
-      placeholder.className = "poster-placeholder";
-      placeholder.textContent = "F1";
-      poster.appendChild(placeholder);
+      const fallback = document.createElement("div");
+      fallback.className = "poster-fallback";
+      fallback.textContent = "F1";
+      poster.appendChild(fallback);
     };
-
     poster.appendChild(img);
-  } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "poster-placeholder";
-    placeholder.textContent = "F1";
-    poster.appendChild(placeholder);
+  }else{
+    const fallback = document.createElement("div");
+    fallback.className = "poster-fallback";
+    fallback.textContent = "F1";
+    poster.appendChild(fallback);
   }
 
-  const badge = document.createElement("div");
-  badge.className = "badge " + (live ? "badge-live" : "badge-upcoming");
-  badge.textContent = live ? "Live" : "Upcoming";
+  const badge = document.createElement("span");
+  badge.className = "badge " + (isLive ? "live" : "upcoming");
+  badge.textContent = isLive ? "Live" : "Upcoming";
   poster.appendChild(badge);
 
   const body = document.createElement("div");
-  body.className = "card-body";
+  body.className = "body";
 
   const title = document.createElement("h3");
-  title.className = "card-title";
-  title.textContent = stream.name || "F1 stream";
+  title.className = "title";
+  title.textContent = stream.name || "F1";
 
   const time = document.createElement("div");
-  time.className = "card-time";
-  time.textContent = live ? "Nu live" : formatDate(stream.starts_at);
+  time.className = "time";
+  time.textContent = isLive ? "Nu live" : formatTime(stream.starts_at);
 
   const button = document.createElement("button");
+  button.className = "watch" + (isLive ? " live-btn" : "");
   button.type = "button";
-  button.className = "watch-btn" + (live ? " live" : "");
-  button.textContent = live ? "Kijk live" : "Open stream";
-  button.addEventListener("click", () => showPlayer(stream));
+  button.textContent = isLive ? "Kijk live" : "Open stream";
+  button.addEventListener("click", () => openPlayer(stream));
 
-  body.append(title, time, button);
-  card.append(poster, body);
-  return card;
+  body.append(title,time,button);
+  article.append(poster,body);
+  return article;
 }
 
-function showEmpty(container, text) {
-  const empty = document.createElement("div");
-  empty.className = "empty";
-  empty.textContent = text;
-  container.appendChild(empty);
+function empty(container,text){
+  const el = document.createElement("div");
+  el.className = "empty";
+  el.textContent = text;
+  container.appendChild(el);
 }
 
-function renderStreams(streams) {
+function render(streams){
   liveGrid.replaceChildren();
   upcomingGrid.replaceChildren();
 
-  const f1 = streams.filter(isF1).filter(stream => !isPast(stream));
+  const filtered = streams.filter(f1).filter(s => !past(s));
 
-  const live = f1.filter(isLive).sort((a,b) =>
-    new Date(a.starts_at || 0) - new Date(b.starts_at || 0)
-  );
+  const liveStreams = filtered.filter(live).sort((a,b) => dateMs(a.starts_at)-dateMs(b.starts_at));
+  const upcomingStreams = filtered.filter(upcoming).sort((a,b) => dateMs(a.starts_at)-dateMs(b.starts_at));
 
-  const upcoming = f1.filter(isUpcoming).sort((a,b) =>
-    new Date(a.starts_at || 0) - new Date(b.starts_at || 0)
-  );
+  liveCount.textContent = liveStreams.length + (liveStreams.length === 1 ? " stream" : " streams");
+  upcomingCount.textContent = upcomingStreams.length + (upcomingStreams.length === 1 ? " stream" : " streams");
 
-  liveCount.textContent = `${live.length} ${live.length === 1 ? "stream" : "streams"}`;
-  upcomingCount.textContent = `${upcoming.length} ${upcoming.length === 1 ? "stream" : "streams"}`;
+  if(liveStreams.length === 0) empty(liveGrid,"Er is momenteel geen F1-sessie live.");
+  else liveStreams.forEach(s => liveGrid.appendChild(card(s,true)));
 
-  if (!live.length) {
-    showEmpty(liveGrid, "Er is momenteel geen F1-sessie live.");
-  } else {
-    live.forEach(stream => liveGrid.appendChild(createCard(stream, true)));
-  }
-
-  if (!upcoming.length) {
-    showEmpty(upcomingGrid, "Geen aankomende F1-sessies gevonden.");
-  } else {
-    upcoming.forEach(stream => upcomingGrid.appendChild(createCard(stream, false)));
-  }
+  if(upcomingStreams.length === 0) empty(upcomingGrid,"Geen aankomende F1-sessies gevonden.");
+  else upcomingStreams.forEach(s => upcomingGrid.appendChild(card(s,false)));
 }
 
-async function loadStreams() {
-  try {
-    statusText.textContent = "Streams vernieuwen...";
+async function load(){
+  try{
+    status.textContent = "Vernieuwen...";
     errorBox.style.display = "none";
 
-    const response = await fetch(API_URL, {
-      method: "GET",
-      cache: "no-store"
-    });
-
-    if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+    const response = await fetch(API,{cache:"no-store"});
+    if(!response.ok) throw new Error("API HTTP " + response.status);
 
     const data = await response.json();
+    if(!data || data.success !== true) throw new Error("API gaf geen succesvolle response.");
 
-    if (!data || data.success !== true) {
-      throw new Error("API gaf geen succesvolle response.");
-    }
+    const groups = Array.isArray(data.streams) ? data.streams : [];
+    const streams = [];
 
-    const categories = Array.isArray(data.streams) ? data.streams : [];
-    const allStreams = [];
+    for(const group of groups){
+      if(!group || !Array.isArray(group.streams)) continue;
 
-    for (const category of categories) {
-      if (!category || !Array.isArray(category.streams)) continue;
+      for(const item of group.streams){
+        if(!item || typeof item !== "object") continue;
 
-      for (const stream of category.streams) {
-        if (!stream) continue;
-
-        allStreams.push({
-          ...stream,
-          category_name: stream.category_name || category.category || "",
-          category: stream.category || category.category || ""
+        streams.push({
+          ...item,
+          category: item.category || group.category || "",
+          category_name: item.category_name || group.category || ""
         });
       }
     }
 
-    renderStreams(allStreams);
-    statusText.textContent = "Verbonden";
-  } catch (error) {
-    console.error("F1 API fout:", error);
-    statusText.textContent = "Verbindingsfout";
-    errorBox.textContent = "Streams konden niet worden geladen: " + error.message;
+    render(streams);
+    status.textContent = "Verbonden";
+  }catch(err){
+    console.error(err);
+    status.textContent = "Verbindingsfout";
+    errorBox.textContent = "Streams konden niet worden geladen: " + err.message;
     errorBox.style.display = "block";
   }
 }
 
-closePlayer.addEventListener("click", closePlayerWindow);
+$("close").addEventListener("click",closePlayer);
+overlay.addEventListener("click",e => { if(e.target === overlay) closePlayer(); });
+document.addEventListener("keydown",e => { if(e.key === "Escape") closePlayer(); });
 
-playerOverlay.addEventListener("click", event => {
-  if (event.target === playerOverlay) closePlayerWindow();
-});
-
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape") closePlayerWindow();
-});
-
-loadStreams();
-setInterval(loadStreams, REFRESH_INTERVAL);
+load();
+setInterval(load,REFRESH_MS);
 </script>
 </body>
 </html>
