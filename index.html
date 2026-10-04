@@ -3,350 +3,88 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070707">
 <title>F1 Live</title>
 <style>
-*{box-sizing:border-box}
-:root{--bg:#070707;--panel:#111;--line:#242424;--text:#fff;--muted:#929292;--red:#e10600;--green:#20c76a}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{min-height:100vh}
-header{position:sticky;top:0;z-index:10;background:rgba(7,7,7,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.header{max-width:1400px;margin:auto;padding:17px 24px;display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:800}
-.logo b{display:grid;place-items:center;width:35px;height:35px;border-radius:9px;background:var(--red);font-size:14px}
-.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(32,199,106,.7)}
-main{max-width:1400px;margin:auto;padding:32px 24px 40px}
-h1{margin:0 0 8px;font-size:clamp(34px,5vw,54px);line-height:1;letter-spacing:-1.5px}
-.subtitle{margin:0;color:var(--muted)}
-.section{margin-top:36px}
-.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-h2{margin:0;font-size:20px}.count{font-size:13px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
-.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:16px;transition:.15s}
-.card:hover{transform:translateY(-2px);border-color:#383838}
-.poster{position:relative;aspect-ratio:16/9;background:#0c0c0c}
-.poster img{width:100%;height:100%;object-fit:cover;display:block}
-.poster-fallback{width:100%;height:100%;display:grid;place-items:center;font-size:42px;font-weight:900;color:#3e3e3e}
-.badge{position:absolute;top:12px;left:12px;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase}
-.live{background:var(--red);color:#fff}.upcoming{background:rgba(0,0,0,.75);color:#fff;border:1px solid #444}
-.body{padding:16px}.title{margin:0 0 7px;font-size:17px;line-height:1.25}.time{font-size:13px;color:var(--muted)}
-button{font:inherit}
-.watch{width:100%;margin-top:15px;border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#000;font-weight:800;cursor:pointer}
-.watch.live-btn{background:var(--red);color:#fff}
-.empty{padding:38px 20px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
-.error{display:none;margin-top:25px;padding:13px 15px;border-radius:10px;background:#250909;border:1px solid #5a1717;color:#ffaaa7}
-footer{text-align:center;color:#555;font-size:12px;padding:0 20px 28px}
-.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);backdrop-filter:blur(9px);padding:12px;align-items:center;justify-content:center}.overlay.open{display:flex}.player{width:min(1280px,100%);max-height:calc(100vh - 24px);background:#080808;border:1px solid #292929;border-radius:15px;overflow:hidden;display:flex;flex-direction:column}.playerbar{min-height:58px;padding:10px 12px 10px 17px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #222;flex-shrink:0}.playername{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px;flex:1;min-width:0}.player-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.player-btn,.close{height:36px;border:0;border-radius:9px;background:#1b1b1b;color:#fff;padding:0 11px;font-weight:700;cursor:pointer;white-space:nowrap}.player-btn:hover,.close:hover{background:#292929}.close{width:36px;padding:0;font-size:21px}.frame-wrap{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(100vh - 105px);background:#000;flex-shrink:1;overflow:hidden}.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.player-error{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#aaa;background:#080808}.player-error strong{display:block;color:#fff;margin-bottom:8px}.stream-select{height:36px;max-width:230px;border:1px solid #333;border-radius:9px;background:#151515;color:#fff;padding:0 9px;font:inherit;font-size:13px;font-weight:700}@media(max-width:700px){.header{padding:14px 15px}main{padding:25px 15px 35px}.grid{grid-template-columns:1fr}.overlay{padding:6px}.player{max-height:calc(100vh - 12px);border-radius:10px}.playerbar{padding:8px;gap:6px;flex-wrap:wrap}.playername{width:100%;flex-basis:100%;order:0}.player-actions{width:100%;order:1}.player-btn,.close,.stream-select{height:34px}.stream-select{max-width:none;flex:1}.frame-wrap{aspect-ratio:16/9;max-height:calc(100vh - 125px)}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}:root{--bg:#070707;--panel:#111;--panel2:#171717;--line:#292929;--text:#fff;--muted:#929292;--red:#e10600;--green:#20c76a;--gold:#f2c94c}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{min-height:100vh}button,select{font:inherit}
+header{position:sticky;top:0;z-index:20;background:rgba(7,7,7,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.header{max-width:1450px;margin:auto;padding:14px 24px;display:flex;align-items:center;gap:20px}.logo{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:850;margin-right:auto}.logo b{display:grid;place-items:center;width:36px;height:36px;border-radius:9px;background:var(--red);font-size:14px}.nav{display:flex;gap:7px}.nav button,.icon-btn{border:1px solid transparent;background:transparent;color:#aaa;border-radius:9px;padding:9px 11px;cursor:pointer}.nav button:hover,.icon-btn:hover{background:#151515;color:#fff}.nav button.active{background:#1b1b1b;color:#fff}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(32,199,106,.7)}
+main{max-width:1450px;margin:auto;padding:32px 24px 50px}.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:25px}.hero h1{margin:0 0 8px;font-size:clamp(36px,5vw,60px);line-height:.95;letter-spacing:-2px}.subtitle{margin:0;color:var(--muted)}.hero-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.tool-btn{border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:10px;padding:10px 13px;cursor:pointer;font-weight:700}.tool-btn:hover{border-color:#444;background:var(--panel2)}
+.error{display:none;margin-top:25px;padding:13px 15px;border-radius:10px;background:#250909;border:1px solid #5a1717;color:#ffaaa7}.section{margin-top:36px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:12px}h2{margin:0;font-size:20px}.count{font-size:13px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:16px;transition:.15s}.card:hover{transform:translateY(-2px);border-color:#444}.poster{position:relative;aspect-ratio:16/9;background:#0c0c0c}.poster img{width:100%;height:100%;object-fit:cover;display:block}.poster-fallback{width:100%;height:100%;display:grid;place-items:center;font-size:42px;font-weight:900;color:#3e3e3e}.badge{position:absolute;top:12px;left:12px;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase}.live{background:var(--red);color:#fff}.upcoming{background:rgba(0,0,0,.75);color:#fff;border:1px solid #444}.fav{position:absolute;top:9px;right:9px;width:36px;height:36px;border:0;border-radius:9px;background:rgba(0,0,0,.68);color:#fff;cursor:pointer;font-size:19px}.fav.active{color:var(--gold)}.body{padding:16px}.title{margin:0 0 7px;font-size:17px;line-height:1.25}.time{font-size:13px;color:var(--muted)}.watch{width:100%;margin-top:15px;border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#000;font-weight:800;cursor:pointer}.watch.live-btn{background:var(--red);color:#fff}.empty{padding:38px 20px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
+.dashboard{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}.dash-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;min-height:150px}.dash-title{font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.5px;margin-bottom:12px}.countdown{font-size:30px;font-weight:850;letter-spacing:-1px}.session-name{font-size:18px;font-weight:800;margin-bottom:6px}.mini-list{display:grid;gap:8px}.mini-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid #202020}.mini-row:last-child{border-bottom:0}.muted{color:var(--muted)}
+.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.tab{border:1px solid var(--line);background:var(--panel);color:#aaa;border-radius:999px;padding:8px 13px;cursor:pointer;white-space:nowrap}.tab.active{background:#fff;color:#000;border-color:#fff}.weekend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.session-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}.session-card strong{display:block;margin-bottom:6px}.session-card small{color:var(--muted)}
+.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);padding:12px;align-items:center;justify-content:center}.overlay.open{display:flex}.player{width:min(1320px,100%);max-height:calc(100vh - 24px);background:#080808;border:1px solid #292929;border-radius:15px;overflow:hidden;display:flex;flex-direction:column}.playerbar{min-height:58px;padding:10px 12px 10px 17px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #222;flex-shrink:0}.playername{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px;flex:1;min-width:100px}.player-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}.player-btn,.close{height:36px;border:0;border-radius:9px;background:#1b1b1b;color:#fff;padding:0 11px;font-weight:750;cursor:pointer;white-space:nowrap}.player-btn:hover,.close:hover{background:#292929}.close{width:36px;padding:0;font-size:21px}.stream-select{height:36px;max-width:250px;border:1px solid #333;border-radius:9px;background:#151515;color:#fff;padding:0 9px;font-size:13px;font-weight:700}.player-body{display:grid;grid-template-columns:minmax(0,1fr) 280px;min-height:0}.frame-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.player-side{border-left:1px solid #222;background:#0c0c0c;padding:14px;overflow:auto}.side-title{font-size:12px;color:var(--muted);font-weight:850;text-transform:uppercase;margin:0 0 10px}.side-block{margin-bottom:18px}.timing-row{display:grid;grid-template-columns:25px 1fr auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;font-size:12px}.timing-row:last-child{border-bottom:0}.pos{color:#777}.player-error{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#aaa;background:#080808}.player-error strong{display:block;color:#fff;margin-bottom:8px}
+.theater .player{width:100%;max-width:none}.theater .player-body{grid-template-columns:1fr}.theater .player-side{display:none}.theater .frame-wrap{aspect-ratio:16/8.8}.player:fullscreen{width:100vw;height:100vh;max-height:none;border:0;border-radius:0}.player:fullscreen .player-body{height:calc(100vh - 58px)}.player:fullscreen .frame-wrap{height:100%;aspect-ratio:auto}.player:fullscreen .player-side{max-height:100%}
+footer{text-align:center;color:#555;font-size:12px;padding:0 20px 28px}.hidden{display:none!important}
+@media(max-width:1000px){.dashboard{grid-template-columns:1fr 1fr}.player-body{grid-template-columns:1fr}.player-side{display:none}.hero{align-items:flex-start;flex-direction:column}.hero-tools{justify-content:flex-start}}
+@media(max-width:700px){.header{padding:10px 12px;flex-wrap:wrap}.nav{order:3;width:100%;overflow:auto}.nav button{flex:1;white-space:nowrap}main{padding:24px 14px 40px}.grid{grid-template-columns:1fr}.dashboard{grid-template-columns:1fr}.overlay{padding:5px}.player{max-height:calc(100vh - 10px);border-radius:10px}.playerbar{padding:8px;gap:6px;flex-wrap:wrap}.playername{width:100%;flex-basis:100%;order:0}.player-actions{width:100%;order:1}.player-btn,.close,.stream-select{height:34px}.stream-select{max-width:none;flex:1}.frame-wrap{aspect-ratio:16/9}}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="header">
-    <div class="logo"><b>F1</b><span>F1 Live</span></div>
-    <div class="status"><span class="dot"></span><span id="status">Verbinden...</span></div>
-  </div>
-</header>
-
-<main>
-  <h1>Formula 1</h1>
-  <p class="subtitle">Live en aankomende sessies</p>
-
+<header><div class="header"><div class="logo"><b>F1</b><span>F1 Live</span></div><nav class="nav"><button class="active" data-scroll="top">Home</button><button data-scroll="liveSection">Live</button><button data-scroll="weekendSection">Weekend</button><button data-scroll="upcomingSection">Upcoming</button></nav><div class="status"><span class="dot"></span><span id="status">Verbinden...</span></div></div></header>
+<main id="top">
+  <section class="hero"><div><h1>Formula 1</h1><p class="subtitle">Live streams, sessies en race-informatie op één plek.</p></div><div class="hero-tools"><button class="tool-btn" id="themeBtn">◐ Thema</button><button class="tool-btn" id="favoritesBtn">★ Favorieten</button><button class="tool-btn" id="refreshBtn">↻ Vernieuwen</button></div></section>
   <div id="error" class="error"></div>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Live</h2>
-      <span id="liveCount" class="count">0 streams</span>
-    </div>
-    <div id="liveGrid" class="grid"></div>
-  </section>
+  <section class="section" id="liveSection"><div class="section-head"><h2>🔴 Live</h2><span id="liveCount" class="count">0 streams</span></div><div id="liveGrid" class="grid"></div></section>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Upcoming</h2>
-      <span id="upcomingCount" class="count">0 streams</span>
-    </div>
-    <div id="upcomingGrid" class="grid"></div>
-  </section>
+  <section class="section" id="dashboardSection"><div class="section-head"><h2>Race dashboard</h2><span class="count">alleen gegevens die de API levert</span></div><div class="dashboard"><div class="dash-card"><div class="dash-title">Volgende sessie</div><div id="nextSession" class="session-name">Geen sessie gevonden</div><div id="nextTime" class="muted">—</div><div id="countdown" class="countdown">--:--:--</div></div><div class="dash-card"><div class="dash-title">Live status</div><div id="liveSummary" class="mini-list"><div class="muted">Geen live sessie.</div></div></div><div class="dash-card"><div class="dash-title">Race control</div><div id="raceControl" class="mini-list"><div class="muted">Geen race-control data beschikbaar.</div></div></div></div></section>
+
+  <section class="section" id="weekendSection"><div class="section-head"><h2>🏁 Race weekend</h2><span id="weekendCount" class="count">0 sessies</span></div><div id="sessionTabs" class="tabs"></div><div id="weekendGrid" class="weekend-grid" style="margin-top:12px"></div></section>
+
+  <section class="section" id="upcomingSection"><div class="section-head"><h2>📅 Upcoming</h2><span id="upcomingCount" class="count">0 streams</span></div><div id="upcomingGrid" class="grid"></div></section>
 </main>
-
 <footer>Gemaakt door een onafhankelijke maker uit Meppel.</footer>
 
-<div id="overlay" class="overlay">
-  <div class="player">
-    <div class="playerbar">
-      <div id="playerName" class="playername">F1</div>
-      <div class="player-actions">
-        <select id="streamSelect" class="stream-select" aria-label="Kies stream"></select>
-        <button id="fullscreen" class="player-btn" type="button">⛶ Fullscreen</button>
-        <button id="close" class="close" type="button" aria-label="Leave / Sluiten">×</button>
-      </div>
-    </div>
-    <div id="frameWrap" class="frame-wrap"></div>
-  </div>
-</div>
+<div id="overlay" class="overlay"><div class="player" id="player">
+  <div class="playerbar"><div id="playerName" class="playername">F1</div><div class="player-actions"><select id="streamSelect" class="stream-select" aria-label="Kies stream"></select><button id="theater" class="player-btn">▣ Theater</button><button id="fullscreen" class="player-btn">⛶ Fullscreen</button><button id="close" class="close" aria-label="Leave / Sluiten">×</button></div></div>
+  <div class="player-body"><div id="frameWrap" class="frame-wrap"></div><aside class="player-side"><div class="side-block"><div class="side-title">Live timing</div><div id="playerTiming"><div class="muted">Geen timing-data beschikbaar.</div></div></div><div class="side-block"><div class="side-title">Race control</div><div id="playerRaceControl"><div class="muted">Geen race-control data beschikbaar.</div></div></div></aside></div>
+</div></div>
 
 <script>
 "use strict";
-
-const API = "https://api.ppv.st/api/streams";
-const REFRESH_MS = 60000;
-
-const $ = id => document.getElementById(id);
-const liveGrid = $("liveGrid");
-const upcomingGrid = $("upcomingGrid");
-const liveCount = $("liveCount");
-const upcomingCount = $("upcomingCount");
-const status = $("status");
-const errorBox = $("error");
-const overlay = $("overlay");
-const frameWrap = $("frameWrap");
-const playerName = $("playerName");
-const streamSelect = $("streamSelect");
-const fullscreenButton = $("fullscreen");
-let playerStreams = [];
-
-function dateMs(v){
-  if(v === undefined || v === null || v === "") return NaN;
-  const n = Number(v);
-  if(Number.isFinite(n)){
-    return n < 100000000000 ? n * 1000 : n;
-  }
-  const d = Date.parse(v);
-  return Number.isNaN(d) ? NaN : d;
-}
-
-function formatTime(v){
-  const ms = dateMs(v);
-  if(!Number.isFinite(ms)) return "Tijd onbekend";
-  return new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(ms));
-}
-
-function f1(stream){
-  const s = [
-    stream.name,
-    stream.tag,
-    stream.category,
-    stream.category_name
-  ].filter(Boolean).join(" ").toLowerCase();
-  return s.includes("formula 1") || s.includes("formula1") || /\bf1\b/.test(s);
-}
-
-function live(stream){
-  if(stream.always_live === true || Number(stream.always_live) === 1) return true;
-  const now = Date.now();
-  const start = dateMs(stream.starts_at);
-  const end = dateMs(stream.ends_at);
-  return Number.isFinite(start) && start <= now && (!Number.isFinite(end) || end > now);
-}
-
-function upcoming(stream){
-  if(stream.always_live === true || Number(stream.always_live) === 1) return false;
-  const start = dateMs(stream.starts_at);
-  return Number.isFinite(start) && start > Date.now();
-}
-
-function past(stream){
-  if(stream.always_live === true || Number(stream.always_live) === 1) return false;
-  const end = dateMs(stream.ends_at);
-  return Number.isFinite(end) && end <= Date.now();
-}
-
-/*
- * The API documents iframe as a string. This function supports
- * both a plain URL and a complete iframe element.
- */
-function makeIframe(value, title){
-  if(typeof value !== "string") return null;
-  const raw = value.trim();
-  if(!raw) return null;
-
-  if(/<iframe[\s>]/i.test(raw)){
-    const parsed = new DOMParser().parseFromString(raw,"text/html");
-    const source = parsed.querySelector("iframe");
-    if(!source) return null;
-
-    const src = source.getAttribute("src");
-    if(!src) return null;
-
-    const frame = document.createElement("iframe");
-    frame.src = src;
-    frame.title = source.getAttribute("title") || title || "F1";
-    frame.allow = source.getAttribute("allow") || "autoplay; fullscreen; picture-in-picture";
-    frame.referrerPolicy = source.getAttribute("referrerpolicy") || "strict-origin-when-cross-origin";
-    frame.allowFullscreen = true;
-    return frame;
-  }
-
-  try{
-    const url = new URL(raw, location.href);
-    if(!["http:","https:"].includes(url.protocol)) return null;
-
-    const frame = document.createElement("iframe");
-    frame.src = url.href;
-    frame.title = title || "F1";
-    frame.allow = "autoplay; fullscreen; picture-in-picture";
-    frame.referrerPolicy = "strict-origin-when-cross-origin";
-    frame.allowFullscreen = true;
-    return frame;
-  }catch{
-    return null;
-  }
-}
-
-function streamLabel(stream){
-  const text=[stream.name,stream.title,stream.language,stream.lang,stream.tag,stream.category_name].filter(Boolean).join(" ").toLowerCase();
-  if(/(^|[\s\-_])(nl|nederlands|dutch)([\s\-_]|$)/i.test(text)) return "🇳🇱 Nederlands";
-  if(/(^|[\s\-_])(en|eng|english)([\s\-_]|$)/i.test(text)) return "🇬🇧 English";
-  return stream.name || "F1 stream";
-}
-function fillStreamSelect(stream,streams){
-  playerStreams=streams&&streams.length?streams:[stream]; streamSelect.replaceChildren();
-  playerStreams.forEach((item,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=streamLabel(item);streamSelect.appendChild(o);});
-  streamSelect.value=String(Math.max(0,playerStreams.indexOf(stream))); streamSelect.style.display=playerStreams.length>1?"block":"none";
-}
-function setPlayerStream(stream){
-  playerName.textContent=stream.name||"F1"; frameWrap.replaceChildren();
-  const frame=makeIframe(stream.iframe,stream.name||"F1");
-  if(frame) frameWrap.appendChild(frame); else {const box=document.createElement("div");box.className="player-error";const inner=document.createElement("div");const strong=document.createElement("strong");strong.textContent="Geen geldige embed ontvangen.";const text=document.createElement("span");text.textContent="De API heeft voor deze stream geen bruikbare iframe-URL teruggegeven.";inner.append(strong,text);box.appendChild(inner);frameWrap.appendChild(box);}
-}
-function openPlayer(stream,allLiveStreams=[]){fillStreamSelect(stream,allLiveStreams.length?allLiveStreams:[stream]);setPlayerStream(stream);overlay.classList.add("open");document.body.style.overflow="hidden";}
-function closePlayer(){overlay.classList.remove("open");frameWrap.replaceChildren();playerStreams=[];document.body.style.overflow="";if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});}
-async function toggleFullscreen(){try{if(document.fullscreenElement) await document.exitFullscreen();else await document.querySelector(".player").requestFullscreen();}catch(err){console.warn("Fullscreen niet beschikbaar",err);}}
-function updateFullscreenButton(){fullscreenButton.textContent=document.fullscreenElement?"⛶ Exit fullscreen":"⛶ Fullscreen";}
-
-function card(stream,isLive,liveStreams=[]){
-  const article = document.createElement("article");
-  article.className = "card";
-
-  const poster = document.createElement("div");
-  poster.className = "poster";
-
-  if(stream.poster){
-    const img = document.createElement("img");
-    img.src = stream.poster;
-    img.alt = stream.name || "F1";
-    img.loading = "lazy";
-    img.onerror = () => {
-      img.remove();
-      const fallback = document.createElement("div");
-      fallback.className = "poster-fallback";
-      fallback.textContent = "F1";
-      poster.appendChild(fallback);
-    };
-    poster.appendChild(img);
-  }else{
-    const fallback = document.createElement("div");
-    fallback.className = "poster-fallback";
-    fallback.textContent = "F1";
-    poster.appendChild(fallback);
-  }
-
-  const badge = document.createElement("span");
-  badge.className = "badge " + (isLive ? "live" : "upcoming");
-  badge.textContent = isLive ? "Live" : "Upcoming";
-  poster.appendChild(badge);
-
-  const body = document.createElement("div");
-  body.className = "body";
-
-  const title = document.createElement("h3");
-  title.className = "title";
-  title.textContent = stream.name || "F1";
-
-  const time = document.createElement("div");
-  time.className = "time";
-  time.textContent = isLive ? "Nu live" : formatTime(stream.starts_at);
-
-  const button = document.createElement("button");
-  button.className = "watch" + (isLive ? " live-btn" : "");
-  button.type = "button";
-  button.textContent = isLive ? "Kijk live" : "Open stream";
-  button.addEventListener("click", () => openPlayer(stream,isLive?liveStreams:[stream]));
-
-  body.append(title,time,button);
-  article.append(poster,body);
-  return article;
-}
-
-function empty(container,text){
-  const el = document.createElement("div");
-  el.className = "empty";
-  el.textContent = text;
-  container.appendChild(el);
-}
-
-function render(streams){
-  liveGrid.replaceChildren();
-  upcomingGrid.replaceChildren();
-
-  const filtered = streams.filter(f1).filter(s => !past(s));
-
-  const liveStreams = filtered.filter(live).sort((a,b) => dateMs(a.starts_at)-dateMs(b.starts_at));
-  const upcomingStreams = filtered.filter(upcoming).sort((a,b) => dateMs(a.starts_at)-dateMs(b.starts_at));
-
-  liveCount.textContent = liveStreams.length + (liveStreams.length === 1 ? " stream" : " streams");
-  upcomingCount.textContent = upcomingStreams.length + (upcomingStreams.length === 1 ? " stream" : " streams");
-
-  if(liveStreams.length === 0) empty(liveGrid,"Er is momenteel geen F1-sessie live.");
-  else liveStreams.forEach(s => liveGrid.appendChild(card(s,true,liveStreams)));
-
-  if(upcomingStreams.length === 0) empty(upcomingGrid,"Geen aankomende F1-sessies gevonden.");
-  else upcomingStreams.forEach(s => upcomingGrid.appendChild(card(s,false)));
-}
-
-async function load(){
-  try{
-    status.textContent = "Vernieuwen...";
-    errorBox.style.display = "none";
-
-    const response = await fetch(API,{cache:"no-store"});
-    if(!response.ok) throw new Error("API HTTP " + response.status);
-
-    const data = await response.json();
-    if(!data || data.success !== true) throw new Error("API gaf geen succesvolle response.");
-
-    const groups = Array.isArray(data.streams) ? data.streams : [];
-    const streams = [];
-
-    for(const group of groups){
-      if(!group || !Array.isArray(group.streams)) continue;
-
-      for(const item of group.streams){
-        if(!item || typeof item !== "object") continue;
-
-        streams.push({
-          ...item,
-          category: item.category || group.category || "",
-          category_name: item.category_name || group.category || ""
-        });
-      }
-    }
-
-    render(streams);
-    status.textContent = "Verbonden";
-  }catch(err){
-    console.error(err);
-    status.textContent = "Verbindingsfout";
-    errorBox.textContent = "Streams konden niet worden geladen: " + err.message;
-    errorBox.style.display = "block";
-  }
-}
-
-$("close").addEventListener("click",closePlayer);
-fullscreenButton.addEventListener("click",toggleFullscreen);
-streamSelect.addEventListener("change",e=>{const i=Number(e.target.value);if(playerStreams[i])setPlayerStream(playerStreams[i]);});
-document.addEventListener("fullscreenchange",updateFullscreenButton);
-overlay.addEventListener("click",e => { if(e.target === overlay) closePlayer(); });
-document.addEventListener("keydown",e => { if(e.key === "Escape") closePlayer(); });
-
-load();
-setInterval(load,REFRESH_MS);
+const API="https://api.ppv.st/api/streams", REFRESH_MS=60000;
+const $=id=>document.getElementById(id);
+const liveGrid=$("liveGrid"), upcomingGrid=$("upcomingGrid"), liveCount=$("liveCount"), upcomingCount=$("upcomingCount"), status=$("status"), errorBox=$("error"), overlay=$("overlay"), frameWrap=$("frameWrap"), playerName=$("playerName"), streamSelect=$("streamSelect"), player=$("player");
+let allStreams=[], playerStreams=[], currentStream=null, selectedWeekend="all", showFavoritesOnly=false;
+const favKey="f1live-favorites", themeKey="f1live-theme";
+const favorites=()=>JSON.parse(localStorage.getItem(favKey)||"[]");
+function saveFavorites(a){localStorage.setItem(favKey,JSON.stringify(a))}
+function key(s){return String(s.id??s.slug??s.name??s.iframe??"")}
+function isFav(s){return favorites().includes(key(s))}
+function toggleFav(s){let a=favorites();const k=key(s);a=a.includes(k)?a.filter(x=>x!==k):[...a,k];saveFavorites(a);render(allStreams)}
+function dateMs(v){if(v===undefined||v===null||v==="")return NaN;const n=Number(v);if(Number.isFinite(n))return n<100000000000?n*1000:n;const d=Date.parse(v);return Number.isNaN(d)?NaN:d}
+function formatTime(v){const ms=dateMs(v);if(!Number.isFinite(ms))return "Tijd onbekend";return new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(ms))}
+function f1(s){const x=[s.name,s.title,s.tag,s.category,s.category_name].filter(Boolean).join(" ").toLowerCase();return x.includes("formula 1")||x.includes("formula1")||/\bf1\b/.test(x)}
+function live(s){if(s.always_live===true||Number(s.always_live)===1)return true;const n=Date.now(),a=dateMs(s.starts_at),b=dateMs(s.ends_at);return Number.isFinite(a)&&a<=n&&(!Number.isFinite(b)||b>n)}
+function upcoming(s){if(s.always_live===true||Number(s.always_live)===1)return false;const a=dateMs(s.starts_at);return Number.isFinite(a)&&a>Date.now()}
+function past(s){if(s.always_live===true||Number(s.always_live)===1)return false;const b=dateMs(s.ends_at);return Number.isFinite(b)&&b<=Date.now()}
+function makeIframe(value,title){if(typeof value!=="string")return null;const raw=value.trim();if(!raw)return null;if(/<iframe[\s>]/i.test(raw)){const parsed=new DOMParser().parseFromString(raw,"text/html"),source=parsed.querySelector("iframe");if(!source)return null;const src=source.getAttribute("src");if(!src)return null;const frame=document.createElement("iframe");frame.src=src;frame.title=source.getAttribute("title")||title||"F1";frame.allow=source.getAttribute("allow")||"autoplay; fullscreen; picture-in-picture";frame.referrerPolicy=source.getAttribute("referrerpolicy")||"strict-origin-when-cross-origin";frame.allowFullscreen=true;return frame}try{const url=new URL(raw,location.href);if(!["http:","https:"].includes(url.protocol))return null;const frame=document.createElement("iframe");frame.src=url.href;frame.title=title||"F1";frame.allow="autoplay; fullscreen; picture-in-picture";frame.referrerPolicy="strict-origin-when-cross-origin";frame.allowFullscreen=true;return frame}catch{return null}}
+function streamLanguage(s){const x=[s.name,s.title,s.language,s.lang,s.locale,s.tag,s.category_name].filter(Boolean).join(" ").toLowerCase();if(/(^|[\s\-_])(nl|nederlands|dutch)([\s\-_]|$)/i.test(x))return"🇳🇱 Nederlands";if(/(^|[\s\-_])(en|eng|english|international|intl)([\s\-_]|$)/i.test(x))return"🌍 Internationaal";return"📺 Stream"}
+function streamLabel(s){return streamLanguage(s)+" — "+(s.name||s.title||"F1")}
+function fillStreamSelect(stream,streams){playerStreams=streams.length?streams:[stream];streamSelect.replaceChildren();playerStreams.forEach((s,i)=>{const o=document.createElement("option");o.value=i;o.textContent=streamLabel(s);streamSelect.appendChild(o)});streamSelect.value=String(Math.max(0,playerStreams.indexOf(stream)));streamSelect.classList.toggle("hidden",playerStreams.length<2)}
+function genericTiming(source){const data=source?.timing||source?.standings||source?.leaderboard||source?.drivers;return Array.isArray(data)?data:[]}
+function genericControl(source){const data=source?.race_control||source?.raceControl||source?.messages||source?.incidents;return Array.isArray(data)?data:[]}
+function renderTiming(container,source){container.replaceChildren();const rows=genericTiming(source).slice(0,12);if(!rows.length){container.innerHTML='<div class="muted">Geen timing-data beschikbaar.</div>';return}rows.forEach((r,i)=>{const d=document.createElement("div");d.className="timing-row";d.innerHTML='<span class="pos">'+(r.position??r.pos??i+1)+'</span><span>'+(r.driver_name??r.driver??r.name??"Coureur")+'</span><strong>'+(r.gap??r.time??r.lap_time??"—")+'</strong>';container.appendChild(d)})}
+function renderControl(container,source){container.replaceChildren();const rows=genericControl(source).slice(0,6);if(!rows.length){container.innerHTML='<div class="muted">Geen race-control data beschikbaar.</div>';return}rows.forEach(r=>{const d=document.createElement("div");d.className="mini-row";d.innerHTML='<span>'+(r.message??r.text??r.description??"Melding")+'</span><span class="muted">'+(r.lap??r.time??"")+'</span>';container.appendChild(d)})}
+function setPlayerStream(stream){currentStream=stream;playerName.textContent=stream.name||stream.title||"F1";frameWrap.replaceChildren();const frame=makeIframe(stream.iframe,stream.name||"F1");if(frame)frameWrap.appendChild(frame);else{const box=document.createElement("div");box.className="player-error";box.innerHTML='<div><strong>Geen geldige embed ontvangen.</strong><span>De API heeft voor deze stream geen bruikbare iframe-URL teruggegeven.</span></div>';frameWrap.appendChild(box)}renderTiming($("playerTiming"),stream);renderControl($("playerRaceControl"),stream)}
+function openPlayer(stream,streams){fillStreamSelect(stream,streams?.length?streams:[stream]);setPlayerStream(stream);overlay.classList.add("open");document.body.style.overflow="hidden"}
+function closePlayer(){overlay.classList.remove("open");frameWrap.replaceChildren();playerStreams=[];currentStream=null;document.body.style.overflow="";if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});player.classList.remove("theater")}
+async function toggleFullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await player.requestFullscreen()}catch(e){console.warn(e)}}
+function toggleTheater(){player.classList.toggle("theater")}
+function updateFull(){ $("fullscreen").textContent=document.fullscreenElement?"⛶ Exit fullscreen":"⛶ Fullscreen" }
+function card(s,isLive,liveStreams=[]){const article=document.createElement("article");article.className="card";const poster=document.createElement("div");poster.className="poster";if(s.poster){const img=document.createElement("img");img.src=s.poster;img.alt=s.name||"F1";img.loading="lazy";img.onerror=()=>{img.remove();const f=document.createElement("div");f.className="poster-fallback";f.textContent="F1";poster.appendChild(f)};poster.appendChild(img)}else{const f=document.createElement("div");f.className="poster-fallback";f.textContent="F1";poster.appendChild(f)}const badge=document.createElement("span");badge.className="badge "+(isLive?"live":"upcoming");badge.textContent=isLive?"Live":"Upcoming";poster.appendChild(badge);const fav=document.createElement("button");fav.className="fav"+(isFav(s)?" active":"");fav.textContent=isFav(s)?"★":"☆";fav.title="Favoriet";fav.onclick=e=>{e.stopPropagation();toggleFav(s)};poster.appendChild(fav);const body=document.createElement("div");body.className="body";const title=document.createElement("h3");title.className="title";title.textContent=s.name||s.title||"F1";const time=document.createElement("div");time.className="time";time.textContent=isLive?"● Nu live":formatTime(s.starts_at);const button=document.createElement("button");button.className="watch"+(isLive?" live-btn":"");button.type="button";button.textContent=isLive?"Kijk live":"Open stream";button.onclick=()=>openPlayer(s,isLive?liveStreams:[s]);body.append(title,time,button);article.append(poster,body);return article}
+function empty(c,t){const e=document.createElement("div");e.className="empty";e.textContent=t;c.appendChild(e)}
+function sessionName(s){return s.session_name||s.session||s.event_name||s.name||s.title||"Sessie"}
+function renderWeekend(streams){const upcomingAndLive=streams.filter(s=>live(s)||upcoming(s)).sort((a,b)=>(dateMs(a.starts_at)||Infinity)-(dateMs(b.starts_at)||Infinity));const unique=new Map();upcomingAndLive.forEach(s=>{const n=sessionName(s);if(!unique.has(n))unique.set(n,s)});$("weekendCount").textContent=upcomingAndLive.length+" sessies";const tabs=$("sessionTabs");tabs.replaceChildren();const all=document.createElement("button");all.className="tab"+(selectedWeekend==="all"?" active":"");all.textContent="Alle";all.onclick=()=>{selectedWeekend="all";renderWeekend(streams)};tabs.appendChild(all);[...unique.keys()].slice(0,8).forEach(n=>{const b=document.createElement("button");b.className="tab"+(selectedWeekend===n?" active":"");b.textContent=n;b.onclick=()=>{selectedWeekend=n;renderWeekend(streams)};tabs.appendChild(b)});const grid=$("weekendGrid");grid.replaceChildren();const filtered=selectedWeekend==="all"?upcomingAndLive:upcomingAndLive.filter(s=>sessionName(s)===selectedWeekend);if(!filtered.length){empty(grid,"Geen sessies beschikbaar.");return}filtered.slice(0,12).forEach(s=>{const d=document.createElement("div");d.className="session-card";d.innerHTML='<strong>'+(live(s)?"🔴 ":"")+sessionName(s)+'</strong><small>'+(live(s)?"Nu live":formatTime(s.starts_at))+'</small>';d.onclick=()=>openPlayer(s,live(s)?upcomingAndLive.filter(live):[s]);d.style.cursor="pointer";grid.appendChild(d)})}
+function renderDashboard(streams){const next=streams.filter(upcoming).sort((a,b)=>dateMs(a.starts_at)-dateMs(b.starts_at))[0];$("nextSession").textContent=next?sessionName(next):"Geen volgende sessie";$("nextTime").textContent=next?formatTime(next.starts_at):"—";$("countdown").dataset.target=next?dateMs(next.starts_at):"";const ls=streams.filter(live);const summary=$("liveSummary");summary.replaceChildren();if(!ls.length)summary.innerHTML='<div class="muted">Geen live sessie.</div>';else ls.slice(0,5).forEach(s=>{const d=document.createElement("div");d.className="mini-row";d.innerHTML='<span>'+streamLanguage(s)+'</span><strong>LIVE</strong>';summary.appendChild(d)});renderControl($("raceControl"),ls[0]||next)}
+function updateCountdown(){const el=$("countdown"),target=Number(el.dataset.target);if(!Number.isFinite(target)){el.textContent="--:--:--";return}let diff=Math.max(0,target-Date.now());const h=Math.floor(diff/3600000),m=Math.floor(diff%3600000/60000),s=Math.floor(diff%60000/1000);el.textContent=[h,m,s].map((x,i)=>String(x).padStart(i?2:1,"0")).join(":")}
+function render(streams){allStreams=streams;liveGrid.replaceChildren();upcomingGrid.replaceChildren();const filtered=streams.filter(f1).filter(s=>!past(s));let ls=filtered.filter(live).sort((a,b)=>(dateMs(a.starts_at)||0)-(dateMs(b.starts_at)||0));let us=filtered.filter(upcoming).sort((a,b)=>dateMs(a.starts_at)-dateMs(b.starts_at));if(showFavoritesOnly){ls=ls.filter(isFav);us=us.filter(isFav)}liveCount.textContent=ls.length+" "+(ls.length===1?"stream":"streams");upcomingCount.textContent=us.length+" "+(us.length===1?"stream":"streams");if(!ls.length)empty(liveGrid,showFavoritesOnly?"Geen favoriete live streams.":"Er is momenteel geen F1-sessie live.");else ls.forEach(s=>liveGrid.appendChild(card(s,true,ls)));if(!us.length)empty(upcomingGrid,showFavoritesOnly?"Geen favoriete upcoming streams.":"Geen aankomende F1-sessies gevonden.");else us.forEach(s=>upcomingGrid.appendChild(card(s,false)));renderWeekend(filtered);renderDashboard(filtered)}
+async function load(){try{status.textContent="Vernieuwen...";errorBox.style.display="none";const response=await fetch(API,{cache:"no-store"});if(!response.ok)throw new Error("API HTTP "+response.status);const data=await response.json();if(!data||data.success!==true)throw new Error("API gaf geen succesvolle response.");const groups=Array.isArray(data.streams)?data.streams:[],streams=[];for(const group of groups){if(!group||!Array.isArray(group.streams))continue;for(const item of group.streams){if(!item||typeof item!=="object")continue;streams.push({...item,category:item.category||group.category||"",category_name:item.category_name||group.category||""})}}render(streams);status.textContent="Verbonden"}catch(err){console.error(err);status.textContent="Verbindingsfout";errorBox.textContent="Streams konden niet worden geladen: "+err.message;errorBox.style.display="block"}}
+function applyTheme(){document.documentElement.dataset.theme=localStorage.getItem(themeKey)||"dark";const light=document.documentElement.dataset.theme==="light";if(light){document.documentElement.style.setProperty("--bg","#f3f3f3");document.documentElement.style.setProperty("--panel","#fff");document.documentElement.style.setProperty("--panel2","#f0f0f0");document.documentElement.style.setProperty("--line","#ddd");document.documentElement.style.setProperty("--text","#111");document.documentElement.style.setProperty("--muted","#666")}else{["--bg","--panel","--panel2","--line","--text","--muted"].forEach(x=>document.documentElement.style.removeProperty(x))}}
+$("close").addEventListener("click",closePlayer);$("fullscreen").addEventListener("click",toggleFullscreen);$("theater").addEventListener("click",toggleTheater);streamSelect.addEventListener("change",e=>{const s=playerStreams[Number(e.target.value)];if(s)setPlayerStream(s)});document.addEventListener("fullscreenchange",updateFull);overlay.addEventListener("click",e=>{if(e.target===overlay)closePlayer()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&overlay.classList.contains("open"))closePlayer()});$("refreshBtn").onclick=load;$("favoritesBtn").onclick=()=>{showFavoritesOnly=!showFavoritesOnly;$("favoritesBtn").textContent=showFavoritesOnly?"★ Alle streams":"★ Favorieten";render(allStreams)};$("themeBtn").onclick=()=>{localStorage.setItem(themeKey,localStorage.getItem(themeKey)==="light"?"dark":"light");applyTheme()};document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.scroll).scrollIntoView({behavior:"smooth",block:"start"}));
+applyTheme();load();setInterval(load,REFRESH_MS);setInterval(updateCountdown,1000);updateCountdown();
 </script>
 </body>
 </html>
-setInterval(load,REFRESH_MS);
-</script>
-</body>
-</html>
+
