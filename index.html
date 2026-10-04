@@ -4,170 +4,616 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>F1 Live</title>
+    <title>F1 Stream Center</title>
 
     <style>
+        :root {
+            --bg: #070707;
+            --surface: #101010;
+            --surface-2: #151515;
+            --border: rgba(255,255,255,.09);
+            --text: #f5f5f5;
+            --muted: #909090;
+            --red: #e10600;
+            --red-dark: #9d0000;
+            --green: #16c784;
+        }
+
         * {
             box-sizing: border-box;
         }
 
-        body {
-            margin: 0;
-            background: #080808;
-            color: #fff;
-            font-family: Arial, Helvetica, sans-serif;
+        html {
+            scroll-behavior: smooth;
         }
 
+        body {
+            margin: 0;
+            background:
+                radial-gradient(
+                    circle at 80% 0%,
+                    rgba(225, 6, 0, .12),
+                    transparent 35%
+                ),
+                var(--bg);
+            color: var(--text);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+            min-height: 100vh;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
         header {
-            padding: 22px 35px;
-            background: #101010;
-            border-bottom: 1px solid #242424;
+            height: 72px;
+            padding: 0 38px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
+            background: rgba(10,10,10,.85);
+            border-bottom: 1px solid var(--border);
+
+            position: sticky;
+            top: 0;
+            z-index: 50;
+
+            backdrop-filter: blur(18px);
         }
 
-        .logo {
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-f1 {
             font-size: 25px;
-            font-weight: 800;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--red);
             letter-spacing: -1px;
         }
 
-        .logo span {
-            color: #e10600;
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
         }
 
-        #status {
-            color: #888;
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            color: var(--muted);
             font-size: 13px;
         }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(22,199,132,.7);
+        }
+
+        .status-dot.error {
+            background: var(--red);
+            box-shadow: 0 0 10px rgba(225,6,0,.7);
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
 
         main {
-            max-width: 1400px;
-            margin: auto;
-            padding: 30px;
+            width: min(1450px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 70px;
         }
 
-        h1 {
-            margin: 0 0 25px;
-            font-size: 32px;
-        }
+        /* HERO */
 
-        #streams {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: #121212;
-            border: 1px solid #252525;
-            border-radius: 12px;
+        .hero {
+            position: relative;
             overflow: hidden;
-            cursor: pointer;
-            transition: .2s;
+
+            min-height: 255px;
+
+            border: 1px solid var(--border);
+            border-radius: 22px;
+
+            padding: 42px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    115deg,
+                    rgba(225,6,0,.18),
+                    rgba(225,6,0,.04) 42%,
+                    rgba(255,255,255,.02)
+                ),
+                #101010;
+
+            box-shadow: 0 25px 70px rgba(0,0,0,.35);
         }
 
-        .card:hover {
-            transform: translateY(-3px);
-            border-color: #e10600;
+        .hero::after {
+            content: "";
+            position: absolute;
+
+            width: 420px;
+            height: 420px;
+
+            right: -150px;
+            top: -180px;
+
+            background: radial-gradient(
+                circle,
+                rgba(225,6,0,.25),
+                transparent 70%
+            );
+
+            pointer-events: none;
         }
 
-        .poster {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            object-fit: cover;
-            background: #1c1c1c;
+        .hero-label {
+            color: #ff4b45;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
         }
 
-        .info {
-            padding: 15px;
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(42px, 6vw, 76px);
+            line-height: .95;
+            letter-spacing: -3px;
         }
 
-        .name {
-            font-weight: 700;
-            font-size: 17px;
-            margin-bottom: 8px;
+        .hero p {
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-size: 16px;
         }
 
-        .tag {
-            color: #999;
+        .stats {
+            display: flex;
+            gap: 25px;
+            margin-top: 24px;
+            color: #bbb;
             font-size: 13px;
         }
 
-        .live {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 5px 8px;
-            border-radius: 5px;
-            background: #e10600;
-            font-size: 11px;
-            font-weight: bold;
+        /* =========================
+           SECTIONS
+        ========================= */
+
+        .section {
+            margin-top: 42px;
         }
 
-        .empty {
-            color: #888;
-            padding: 30px 0;
-        }
-
-        /* Player */
-
-        #player {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 1000;
-        }
-
-        #playerHeader {
-            height: 60px;
+        .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            background: #111;
+            margin-bottom: 18px;
         }
 
-        #playerTitle {
-            font-weight: bold;
-        }
-
-        #closePlayer {
-            border: 0;
-            background: #e10600;
-            color: white;
-            padding: 9px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        #frameContainer {
-            height: calc(100vh - 60px);
+        .section-title {
             display: flex;
-            justify-content: center;
             align-items: center;
+            gap: 11px;
         }
 
-        #frameContainer iframe {
+        .section-title h2 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .section-title .line {
+            width: 4px;
+            height: 25px;
+            border-radius: 4px;
+            background: var(--red);
+        }
+
+        .count {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================
+           STREAM GRID
+        ========================= */
+
+        .stream-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .stream-card {
+            position: relative;
+            overflow: hidden;
+
+            min-height: 315px;
+
+            border-radius: 16px;
+            border: 1px solid var(--border);
+
+            background: var(--surface);
+
+            cursor: pointer;
+
+            transition:
+                transform .2s ease,
+                border-color .2s ease,
+                box-shadow .2s ease;
+        }
+
+        .stream-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(225,6,0,.65);
+            box-shadow: 0 18px 45px rgba(0,0,0,.45);
+        }
+
+        .poster {
+            position: absolute;
+            inset: 0;
+
             width: 100%;
             height: 100%;
-            border: 0;
+
+            object-fit: cover;
+
+            opacity: .65;
+
+            transition: transform .35s ease;
         }
 
-        .no-embed {
+        .stream-card:hover .poster {
+            transform: scale(1.04);
+        }
+
+        .poster-fade {
+            position: absolute;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    to bottom,
+                    rgba(0,0,0,.05) 10%,
+                    rgba(0,0,0,.25) 35%,
+                    rgba(0,0,0,.96) 100%
+                );
+        }
+
+        .card-content {
+            position: absolute;
+            inset: auto 0 0 0;
+
+            padding: 20px;
+        }
+
+        .badges {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+
+            display: flex;
+            gap: 7px;
+        }
+
+        .badge {
+            padding: 6px 9px;
+
+            border-radius: 6px;
+
+            font-size: 10px;
+            font-weight: 900;
+
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .badge.live {
+            background: var(--red);
+            color: white;
+
+            box-shadow:
+                0 0 20px rgba(225,6,0,.4);
+        }
+
+        .badge.soon {
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.16);
+            color: white;
+
+            backdrop-filter: blur(10px);
+        }
+
+        .badge.unavailable {
+            background: rgba(255,255,255,.09);
             color: #aaa;
+        }
+
+        .stream-name {
+            margin: 0 0 7px;
+
+            font-size: 20px;
+            font-weight: 800;
+
+            line-height: 1.15;
+        }
+
+        .stream-tag {
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .stream-time {
+            margin-top: 12px;
+
+            color: #ddd;
+            font-size: 13px;
+        }
+
+        .stream-time strong {
+            color: white;
+        }
+
+        .watch-button {
+            width: 100%;
+
+            margin-top: 15px;
+            padding: 11px 14px;
+
+            border: 0;
+            border-radius: 8px;
+
+            background: white;
+            color: #111;
+
+            font-weight: 800;
+            font-size: 13px;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .watch-button:hover {
+            background: #e10600;
+            color: white;
+        }
+
+        .watch-button.disabled {
+            background: #262626;
+            color: #777;
+            cursor: default;
+        }
+
+        .watch-button.disabled:hover {
+            background: #262626;
+            color: #777;
+        }
+
+        /* =========================
+           EMPTY / ERROR
+        ========================= */
+
+        .message {
+            padding: 35px;
+
+            border: 1px solid var(--border);
+            border-radius: 15px;
+
+            background: var(--surface);
+
+            color: var(--muted);
             text-align: center;
         }
 
-        @media (max-width: 600px) {
+        .message strong {
+            display: block;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        /* =========================
+           PLAYER
+        ========================= */
+
+        .player-overlay {
+            display: none;
+
+            position: fixed;
+            inset: 0;
+
+            z-index: 1000;
+
+            background: #000;
+        }
+
+        .player-overlay.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-header {
+            height: 65px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 20px;
+
+            background: #101010;
+            border-bottom: 1px solid #242424;
+        }
+
+        .player-title {
+            font-weight: 800;
+            font-size: 17px;
+        }
+
+        .close-player {
+            border: 0;
+
+            background: #222;
+            color: white;
+
+            padding: 9px 14px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+        }
+
+        .close-player:hover {
+            background: var(--red);
+        }
+
+        .player-body {
+            flex: 1;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 0;
+        }
+
+        .player-body iframe {
+            width: 100%;
+            height: 100%;
+
+            border: 0;
+        }
+
+        .player-message {
+            max-width: 500px;
+
+            padding: 35px;
+
+            text-align: center;
+        }
+
+        .player-message h2 {
+            margin-top: 0;
+        }
+
+        .player-message p {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading {
+            min-height: 250px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: var(--muted);
+        }
+
+        .spinner {
+            width: 22px;
+            height: 22px;
+
+            margin-right: 12px;
+
+            border: 3px solid #333;
+            border-top-color: var(--red);
+
+            border-radius: 50%;
+
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            padding: 25px;
+
+            border-top: 1px solid var(--border);
+
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
             header {
-                padding: 18px;
+                padding: 0 18px;
+            }
+
+            .api-status {
+                font-size: 11px;
             }
 
             main {
-                padding: 18px;
+                width: min(100% - 28px, 1450px);
+                padding-top: 25px;
+            }
+
+            .hero {
+                padding: 28px;
+                min-height: 220px;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+                gap: 10px 20px;
+            }
+
+            .stream-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -176,229 +622,954 @@
 <body>
 
 <header>
-    <div class="logo">
-        <span>F1</span> Live
+
+    <div class="brand">
+        <div class="brand-f1">F1</div>
+        <div class="brand-name">Stream Center</div>
     </div>
 
-    <div id="status">
-        Laden...
+    <div class="api-status">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">Streams laden...</span>
     </div>
+
 </header>
 
-<main>
-    <h1>Formula 1</h1>
 
-    <div id="streams">
-        <div class="empty">Streams laden...</div>
-    </div>
+<main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-label">
+            Formula 1
+        </div>
+
+        <h1>
+            Live Racing
+        </h1>
+
+        <p>
+            Bekijk beschikbare Formula 1 streams en aankomende sessies.
+        </p>
+
+        <div class="stats">
+
+            <span id="streamCount">
+                0 streams
+            </span>
+
+            <span id="lastUpdate">
+                Nog niet bijgewerkt
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- LIVE -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div class="section-title">
+                <span class="line"></span>
+                <h2>Live</h2>
+            </div>
+
+            <span id="liveCount" class="count">
+                0 streams
+            </span>
+
+        </div>
+
+        <div
+            id="liveStreams"
+            class="stream-grid"
+        ></div>
+
+    </section>
+
+
+    <!-- UPCOMING -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <div class="section-title">
+                <span class="line"></span>
+                <h2>Upcoming</h2>
+            </div>
+
+            <span id="upcomingCount" class="count">
+                0 streams
+            </span>
+
+        </div>
+
+        <div
+            id="upcomingStreams"
+            class="stream-grid"
+        ></div>
+
+    </section>
+
 </main>
 
-<!-- Player -->
-<div id="player">
-    <div id="playerHeader">
-        <div id="playerTitle">F1</div>
-        <button id="closePlayer">Sluiten</button>
+
+<footer>
+    F1 Stream Center
+</footer>
+
+
+<!-- PLAYER -->
+
+<div
+    id="playerOverlay"
+    class="player-overlay"
+>
+
+    <div class="player-header">
+
+        <div
+            id="playerTitle"
+            class="player-title"
+        >
+            F1 Stream
+        </div>
+
+        <button
+            id="closePlayer"
+            class="close-player"
+        >
+            Sluiten ✕
+        </button>
+
     </div>
 
-    <div id="frameContainer"></div>
+    <div
+        id="playerBody"
+        class="player-body"
+    ></div>
+
 </div>
 
+
 <script>
-    const API_URL = "https://api.ppv.st/api/streams";
 
-    const streamsContainer = document.getElementById("streams");
-    const statusElement = document.getElementById("status");
+    /* ==========================================
+       CONFIG
+    ========================================== */
 
-    const player = document.getElementById("player");
-    const playerTitle = document.getElementById("playerTitle");
-    const frameContainer = document.getElementById("frameContainer");
-    const closePlayer = document.getElementById("closePlayer");
+    const API_URL =
+        "https://api.ppv.st/api/streams";
+
+    const REFRESH_INTERVAL =
+        60 * 1000;
 
 
-    async function loadStreams() {
+    /* ==========================================
+       ELEMENTS
+    ========================================== */
+
+    const liveStreams =
+        document.getElementById("liveStreams");
+
+    const upcomingStreams =
+        document.getElementById("upcomingStreams");
+
+    const liveCount =
+        document.getElementById("liveCount");
+
+    const upcomingCount =
+        document.getElementById("upcomingCount");
+
+    const streamCount =
+        document.getElementById("streamCount");
+
+    const statusText =
+        document.getElementById("statusText");
+
+    const statusDot =
+        document.getElementById("statusDot");
+
+    const lastUpdate =
+        document.getElementById("lastUpdate");
+
+    const playerOverlay =
+        document.getElementById("playerOverlay");
+
+    const playerTitle =
+        document.getElementById("playerTitle");
+
+    const playerBody =
+        document.getElementById("playerBody");
+
+    const closePlayer =
+        document.getElementById("closePlayer");
+
+
+    /* ==========================================
+       API
+    ========================================== */
+
+    async function fetchStreams() {
+
         try {
-            statusElement.textContent = "Streams ophalen...";
 
-            const response = await fetch(API_URL);
+            setStatus(
+                "Streams ophalen...",
+                false
+            );
+
+            const response =
+                await fetch(API_URL, {
+                    cache: "no-store"
+                });
 
             if (!response.ok) {
-                throw new Error("API request mislukt");
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
             }
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
-            if (!data.success || !Array.isArray(data.streams)) {
-                throw new Error("Ongeldige API-response");
+            if (
+                !data.success ||
+                !Array.isArray(data.streams)
+            ) {
+                throw new Error(
+                    "Ongeldige API-response"
+                );
             }
 
-            /*
-             * Zoek alle streams die bij Formula 1 horen.
-             *
-             * We controleren zowel de categorie als de naam/tag,
-             * omdat F1-events niet noodzakelijk allemaal dezelfde
-             * categorienaam hoeven te gebruiken.
-             */
-            const f1Streams = [];
-
-            for (const category of data.streams) {
-
-                const categoryName =
-                    String(category.category || "").toLowerCase();
-
-                for (const stream of (category.streams || [])) {
-
-                    const text = [
-                        categoryName,
-                        stream.category_name || "",
-                        stream.name || "",
-                        stream.tag || "",
-                        stream.uri_name || ""
-                    ]
-                    .join(" ")
-                    .toLowerCase();
-
-                    if (
-                        text.includes("formula 1") ||
-                        text.includes("formula1") ||
-                        text.includes("f1")
-                    ) {
-                        f1Streams.push(stream);
-                    }
-                }
-            }
+            const f1Streams =
+                extractF1Streams(data.streams);
 
             renderStreams(f1Streams);
 
-            const time = new Date(
-                (data.timestamp || Math.floor(Date.now() / 1000)) * 1000
+            const now =
+                new Date();
+
+            setStatus(
+                "Verbonden",
+                false
             );
 
-            statusElement.textContent =
-                `${f1Streams.length} F1 stream(s) • ${time.toLocaleTimeString()}`;
+            streamCount.textContent =
+                `${f1Streams.length} stream${f1Streams.length === 1 ? "" : "s"}`;
+
+            lastUpdate.textContent =
+                `Bijgewerkt om ${now.toLocaleTimeString(
+                    "nl-NL",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                )}`;
 
         } catch (error) {
-            console.error(error);
 
-            statusElement.textContent = "Fout";
+            console.error(
+                "F1 API error:",
+                error
+            );
 
-            streamsContainer.innerHTML = `
-                <div class="empty">
-                    Kon de streams niet laden.<br><br>
-                    ${escapeHtml(error.message)}
-                </div>
-            `;
+            setStatus(
+                "API niet beschikbaar",
+                true
+            );
+
+            streamCount.textContent =
+                "Geen streams";
+
+            lastUpdate.textContent =
+                "Kon gegevens niet ophalen";
+
+            showError();
         }
     }
 
+
+    /* ==========================================
+       FIND F1 STREAMS
+    ========================================== */
+
+    function extractF1Streams(categories) {
+
+        const result = [];
+
+        for (
+            const category
+            of categories
+        ) {
+
+            const categoryText =
+                String(
+                    category.category || ""
+                ).toLowerCase();
+
+            for (
+                const stream
+                of (category.streams || [])
+            ) {
+
+                const searchableText = [
+
+                    categoryText,
+
+                    stream.category_name || "",
+
+                    stream.name || "",
+
+                    stream.tag || "",
+
+                    stream.uri_name || ""
+
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+                /*
+                 * F1 filter.
+                 */
+
+                const isF1 =
+                    searchableText.includes(
+                        "formula 1"
+                    ) ||
+                    searchableText.includes(
+                        "formula1"
+                    ) ||
+                    searchableText.includes(
+                        "f1"
+                    );
+
+
+                if (isF1) {
+
+                    result.push({
+                        ...stream,
+
+                        category:
+                            category.category || ""
+                    });
+
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    /* ==========================================
+       CLASSIFY STREAM
+    ========================================== */
+
+    function getStreamState(stream) {
+
+        const now =
+            Date.now();
+
+        const start =
+            Number(stream.starts_at || 0)
+            * 1000;
+
+        const end =
+            Number(stream.ends_at || 0)
+            * 1000;
+
+
+        if (stream.always_live === 1) {
+
+            return "live";
+        }
+
+
+        if (
+            start &&
+            end &&
+            now >= start &&
+            now <= end
+        ) {
+
+            return "live";
+        }
+
+
+        if (
+            start &&
+            start > now
+        ) {
+
+            return "upcoming";
+        }
+
+
+        /*
+         * Past streams are not shown.
+         */
+
+        return "past";
+    }
+
+
+    /* ==========================================
+       RENDER
+    ========================================== */
 
     function renderStreams(streams) {
 
-        streamsContainer.innerHTML = "";
+        liveStreams.innerHTML = "";
+        upcomingStreams.innerHTML = "";
 
-        if (streams.length === 0) {
-            streamsContainer.innerHTML = `
-                <div class="empty">
-                    Er zijn momenteel geen F1-streams beschikbaar.
-                </div>
-            `;
 
-            return;
-        }
+        const live = [];
+
+        const upcoming = [];
+
 
         streams.forEach(stream => {
 
-            const card = document.createElement("div");
-            card.className = "card";
+            const state =
+                getStreamState(stream);
 
-            const start = stream.starts_at
-                ? new Date(stream.starts_at * 1000)
-                : null;
 
-            const end = stream.ends_at
-                ? new Date(stream.ends_at * 1000)
-                : null;
+            if (state === "live") {
 
-            const now = Date.now();
+                live.push(stream);
 
-            const isLive =
-                stream.always_live === 1 ||
-                (start && end &&
-                 now >= start.getTime() &&
-                 now <= end.getTime());
+            } else if (
+                state === "upcoming"
+            ) {
 
-            card.innerHTML = `
-                ${
-                    stream.poster
-                    ? `<img
-                        class="poster"
-                        src="${escapeAttribute(stream.poster)}"
-                        alt=""
-                        loading="lazy"
-                      >`
-                    : `<div class="poster"></div>`
-                }
+                upcoming.push(stream);
+            }
 
-                <div class="info">
-                    <div class="name">
-                        ${escapeHtml(stream.name || "F1 Stream")}
-                    </div>
-
-                    <div class="tag">
-                        ${escapeHtml(stream.tag || "Formula 1")}
-                    </div>
-
-                    ${
-                        isLive
-                        ? `<div class="live">● LIVE</div>`
-                        : ""
-                    }
-                </div>
-            `;
-
-            card.addEventListener("click", () => {
-                openPlayer(stream);
-            });
-
-            streamsContainer.appendChild(card);
         });
+
+
+        /*
+         * LIVE first.
+         */
+
+        live.sort(
+            (a, b) =>
+                Number(a.starts_at || 0) -
+                Number(b.starts_at || 0)
+        );
+
+
+        /*
+         * Upcoming:
+         * earliest first.
+         */
+
+        upcoming.sort(
+            (a, b) =>
+                Number(a.starts_at || 0) -
+                Number(b.starts_at || 0)
+        );
+
+
+        liveCount.textContent =
+            `${live.length} stream${live.length === 1 ? "" : "s"}`;
+
+        upcomingCount.textContent =
+            `${upcoming.length} stream${upcoming.length === 1 ? "" : "s"}`;
+
+
+        if (live.length === 0) {
+
+            liveStreams.innerHTML =
+                emptyMessage(
+                    "Geen live F1-streams",
+                    "Er is momenteel geen F1-sessie live."
+                );
+
+        } else {
+
+            live.forEach(stream => {
+
+                liveStreams.appendChild(
+                    createCard(
+                        stream,
+                        "live"
+                    )
+                );
+
+            });
+        }
+
+
+        if (upcoming.length === 0) {
+
+            upcomingStreams.innerHTML =
+                emptyMessage(
+                    "Geen aankomende streams",
+                    "Er zijn momenteel geen toekomstige F1-sessies beschikbaar."
+                );
+
+        } else {
+
+            upcoming.forEach(stream => {
+
+                upcomingStreams.appendChild(
+                    createCard(
+                        stream,
+                        "upcoming"
+                    )
+                );
+
+            });
+        }
     }
 
+
+    /* ==========================================
+       CREATE CARD
+    ========================================== */
+
+    function createCard(
+        stream,
+        state
+    ) {
+
+        const card =
+            document.createElement("article");
+
+        card.className =
+            "stream-card";
+
+
+        /*
+         * Poster
+         */
+
+        if (stream.poster) {
+
+            const image =
+                document.createElement("img");
+
+            image.className =
+                "poster";
+
+            image.src =
+                stream.poster;
+
+            image.alt =
+                "";
+
+            image.loading =
+                "lazy";
+
+            image.onerror =
+                () => {
+
+                    image.style.display =
+                        "none";
+                };
+
+            card.appendChild(image);
+        }
+
+
+        const fade =
+            document.createElement("div");
+
+        fade.className =
+            "poster-fade";
+
+        card.appendChild(fade);
+
+
+        /*
+         * Badge
+         */
+
+        const badges =
+            document.createElement("div");
+
+        badges.className =
+            "badges";
+
+
+        const stateBadge =
+            document.createElement("span");
+
+        stateBadge.className =
+            "badge " +
+            (
+                state === "live"
+                    ? "live"
+                    : "soon"
+            );
+
+        stateBadge.textContent =
+            state === "live"
+                ? "LIVE"
+                : "UPCOMING";
+
+        badges.appendChild(
+            stateBadge
+        );
+
+
+        /*
+         * No iframe badge.
+         */
+
+        if (!stream.iframe) {
+
+            const unavailable =
+                document.createElement("span");
+
+            unavailable.className =
+                "badge unavailable";
+
+            unavailable.textContent =
+                "GEEN EMBED";
+
+            badges.appendChild(
+                unavailable
+            );
+        }
+
+
+        card.appendChild(
+            badges
+        );
+
+
+        /*
+         * Content
+         */
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "card-content";
+
+
+        const title =
+            document.createElement("h3");
+
+        title.className =
+            "stream-name";
+
+        title.textContent =
+            stream.name ||
+            "Formula 1";
+
+        content.appendChild(
+            title
+        );
+
+
+        if (stream.tag) {
+
+            const tag =
+                document.createElement("div");
+
+            tag.className =
+                "stream-tag";
+
+            tag.textContent =
+                stream.tag;
+
+            content.appendChild(
+                tag
+            );
+        }
+
+
+        /*
+         * Time
+         */
+
+        if (stream.starts_at) {
+
+            const time =
+                document.createElement("div");
+
+            time.className =
+                "stream-time";
+
+            time.innerHTML =
+                createTimeText(
+                    stream,
+                    state
+                );
+
+            content.appendChild(
+                time
+            );
+        }
+
+
+        /*
+         * Button
+         */
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            "watch-button";
+
+
+        if (stream.iframe) {
+
+            button.textContent =
+                state === "live"
+                    ? "▶ Nu bekijken"
+                    : "Stream openen";
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    openPlayer(
+                        stream
+                    );
+                }
+            );
+
+        } else {
+
+            button.classList.add(
+                "disabled"
+            );
+
+            button.textContent =
+                "Niet beschikbaar";
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    showNoEmbed(
+                        stream
+                    );
+                }
+            );
+        }
+
+
+        content.appendChild(
+            button
+        );
+
+        card.appendChild(
+            content
+        );
+
+
+        /*
+         * Card click.
+         */
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                if (stream.iframe) {
+
+                    openPlayer(
+                        stream
+                    );
+
+                } else {
+
+                    showNoEmbed(
+                        stream
+                    );
+                }
+            }
+        );
+
+
+        return card;
+    }
+
+
+    /* ==========================================
+       TIME
+    ========================================== */
+
+    function createTimeText(
+        stream,
+        state
+    ) {
+
+        const date =
+            new Date(
+                Number(stream.starts_at)
+                * 1000
+            );
+
+
+        const dateText =
+            date.toLocaleDateString(
+                "nl-NL",
+                {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short"
+                }
+            );
+
+
+        const timeText =
+            date.toLocaleTimeString(
+                "nl-NL",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+
+        if (state === "live") {
+
+            return `
+                <strong>Nu live</strong>
+                · ${timeText}
+            `;
+        }
+
+
+        return `
+            <strong>${dateText}</strong>
+            · ${timeText}
+        `;
+    }
+
+
+    /* ==========================================
+       PLAYER
+    ========================================== */
 
     function openPlayer(stream) {
 
         playerTitle.textContent =
-            stream.name || "F1 Live";
+            stream.name ||
+            "F1 Stream";
 
-        frameContainer.innerHTML = "";
+        playerBody.innerHTML = "";
+
+
+        /*
+         * IMPORTANT:
+         *
+         * We only use the iframe supplied
+         * by the API.
+         */
 
         if (!stream.iframe) {
 
-            frameContainer.innerHTML = `
-                <div class="no-embed">
-                    Voor deze stream is geen embed beschikbaar.
-                </div>
-            `;
+            showNoEmbed(
+                stream
+            );
 
-        } else {
-
-            /*
-             * De API levert zelf de iframe.
-             * Deze wordt rechtstreeks weergegeven zonder
-             * de embed-instellingen aan te passen.
-             */
-            frameContainer.innerHTML = stream.iframe;
+            return;
         }
 
-        player.style.display = "block";
-        document.body.style.overflow = "hidden";
+
+        /*
+         * API iframe plaatsen.
+         */
+
+        playerBody.innerHTML =
+            stream.iframe;
+
+
+        playerOverlay.classList.add(
+            "open"
+        );
+
+        document.body.style.overflow =
+            "hidden";
     }
 
 
+    /* ==========================================
+       NO EMBED
+    ========================================== */
+
+    function showNoEmbed(stream) {
+
+        playerTitle.textContent =
+            stream.name ||
+            "F1 Stream";
+
+
+        playerBody.innerHTML = `
+
+            <div class="player-message">
+
+                <h2>
+                    Stream kan niet worden afgespeeld
+                </h2>
+
+                <p>
+                    Voor deze F1-stream heeft de API
+                    geen <strong>iframe</strong> aangeleverd.
+                </p>
+
+                <p>
+                    Deze pagina probeert daarom geen
+                    eigen stream-URL te verzinnen of
+                    andere embedmethodes te gebruiken.
+                </p>
+
+                <button
+                    class="watch-button"
+                    onclick="closePlayerWindow()"
+                >
+                    Terug naar streams
+                </button>
+
+            </div>
+        `;
+
+
+        playerOverlay.classList.add(
+            "open"
+        );
+
+        document.body.style.overflow =
+            "hidden";
+    }
+
+
+    /* ==========================================
+       CLOSE PLAYER
+    ========================================== */
+
     function closePlayerWindow() {
 
-        player.style.display = "none";
-        frameContainer.innerHTML = "";
-        document.body.style.overflow = "";
+        playerOverlay.classList.remove(
+            "open"
+        );
+
+        playerBody.innerHTML = "";
+
+        document.body.style.overflow =
+            "";
     }
 
 
@@ -408,41 +1579,148 @@
     );
 
 
-    document.addEventListener("keydown", event => {
+    document.addEventListener(
+        "keydown",
+        event => {
 
-        if (event.key === "Escape") {
-            closePlayerWindow();
+            if (
+                event.key === "Escape" &&
+                playerOverlay.classList.contains(
+                    "open"
+                )
+            ) {
+
+                closePlayerWindow();
+            }
         }
+    );
 
-    });
 
+    /* ==========================================
+       STATUS
+    ========================================== */
+
+    function setStatus(
+        text,
+        error = false
+    ) {
+
+        statusText.textContent =
+            text;
+
+        statusDot.classList.toggle(
+            "error",
+            error
+        );
+    }
+
+
+    /* ==========================================
+       EMPTY MESSAGE
+    ========================================== */
+
+    function emptyMessage(
+        title,
+        description
+    ) {
+
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "message";
+
+        wrapper.style.gridColumn =
+            "1 / -1";
+
+        wrapper.innerHTML = `
+            <strong>
+                ${escapeHtml(title)}
+            </strong>
+
+            ${escapeHtml(description)}
+        `;
+
+        return wrapper;
+    }
+
+
+    /* ==========================================
+       ERROR
+    ========================================== */
+
+    function showError() {
+
+        liveStreams.innerHTML =
+            "";
+
+        upcomingStreams.innerHTML =
+            "";
+
+
+        liveStreams.appendChild(
+            emptyMessage(
+                "Streams konden niet worden geladen",
+                "Controleer de API-verbinding en probeer het opnieuw."
+            )
+        );
+
+
+        upcomingStreams.appendChild(
+            emptyMessage(
+                "Geen gegevens",
+                "De API heeft momenteel geen bruikbare gegevens teruggegeven."
+            )
+        );
+    }
+
+
+    /* ==========================================
+       SECURITY / TEXT
+    ========================================== */
 
     function escapeHtml(value) {
 
         return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
     }
 
 
-    function escapeAttribute(value) {
+    /* ==========================================
+       START
+    ========================================== */
 
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;");
-    }
+    fetchStreams();
 
 
-    // Eerste keer laden
-    loadStreams();
+    /*
+     * API-documentatie adviseert ongeveer
+     * één request per minuut.
+     */
 
-    // Volgens de API-documentatie ongeveer iedere minuut verversen
-    setInterval(loadStreams, 60 * 1000);
+    setInterval(
+        fetchStreams,
+        REFRESH_INTERVAL
+    );
 
 </script>
 
