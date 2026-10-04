@@ -70,7 +70,49 @@ function latestByDriver(rows){const map=new Map();for(const r of rows){const id=
 function formatGap(v){if(v==null)return "—";if(typeof v==="string")return v;return v===0?"+0.000":"+"+Number(v).toFixed(3)}
 function renderOpenF1Timing(){const c=$("playerTiming");if(!c)return;c.replaceChildren();const drivers=new Map(openF1State.drivers.map(d=>[d.driver_number,d]));const rows=latestByDriver(openF1State.intervals).sort((a,b)=>{if(a.gap_to_leader==null)return -1;if(b.gap_to_leader==null)return 1;return Number(a.gap_to_leader)-Number(b.gap_to_leader)}).slice(0,20);if(!rows.length){c.innerHTML='<div class="muted">Geen OpenF1 timing beschikbaar.</div>';return}rows.forEach((r,i)=>{const d=drivers.get(r.driver_number)||{},el=document.createElement("div");el.className="timing-row";el.innerHTML='<span class="pos">'+(i+1)+'</span><span><strong>'+((d.name_acronym)||("#"+r.driver_number))+'</strong> <small class="muted">'+(d.team_name||"")+'</small></span><strong>'+formatGap(r.gap_to_leader)+'</strong>';c.appendChild(el)})}
 function renderOpenF1Control(){const c=$("playerRaceControl");if(!c)return;c.replaceChildren();const rows=openF1State.raceControl.slice(-8).reverse();if(!rows.length){c.innerHTML='<div class="muted">Geen OpenF1 race-control meldingen.</div>';return}rows.forEach(r=>{const d=document.createElement("div");d.className="mini-row";d.innerHTML='<span>'+String(r.message||r.category||"Melding")+'</span><span class="muted">'+(r.lap_number?"Lap "+r.lap_number:"")+'</span>';c.appendChild(d)})}
-async function loadOpenF1(){const box=$("openf1Status");try{box.innerHTML='<div class="muted">OpenF1 laden...</div>';const sessions=await openF1Fetch('/sessions?session_key=latest');const session=Array.isArray(sessions)?sessions[0]:null;if(!session)throw new Error("geen sessie");openF1State.session=session;const key=session.session_key;const [drivers,intervals,control]=await Promise.all([openF1Fetch('/drivers?session_key='+key),openF1Fetch('/intervals?session_key='+key),openF1Fetch('/race_control?session_key='+key)]);openF1State.drivers=drivers;openF1State.intervals=intervals;openF1State.raceControl=control;openF1State.live=new Date(session.date_start)<=new Date()&&new Date(session.date_end)>=new Date();box.innerHTML='<div><strong>'+session.session_name+'</strong></div><div class="muted">'+(session.country_name||"")+' · '+(openF1State.live?'🟢 live':'sessiedata')+'</div>';renderOpenF1Timing();renderOpenF1Control()}catch(err){console.warn("OpenF1:",err);box.innerHTML='<div><strong>OpenF1 niet beschikbaar</strong></div><div class="muted">Live data vereist OpenF1-authenticatie/subscriptie.</div>'}}
+async function loadOpenF1(){
+  const box=$("openf1Status");
+  try{
+    box.innerHTML='<div class="muted">OpenF1 sessies laden...</div>';
+    const year=new Date().getUTCFullYear();
+    const sessions=await openF1Fetch('/sessions?year='+year);
+    if(!Array.isArray(sessions)||!sessions.length)throw new Error("geen sessies gevonden");
+    const now=Date.now();
+    const ordered=[...sessions].filter(s=>!s.is_cancelled).sort((a,b)=>dateMs(a.date_start)-dateMs(b.date_start));
+    const current=ordered.find(s=>dateMs(s.date_start)<=now&&dateMs(s.date_end)>=now);
+    const next=ordered.find(s=>dateMs(s.date_start)>now);
+    const session=current||next||ordered[ordered.length-1];
+    openF1State.session=session;
+    openF1State.live=!!current;
+    box.innerHTML='<div><strong>'+session.session_name+'</strong></div><div class="muted">'+(session.country_name||session.location||'')+' · '+(current?'🟢 LIVE':'📅 sessiedata beschikbaar')+'</div>'+(next&&!current?'<div class="muted" style="margin-top:6px">Volgende: '+next.session_name+' · '+formatTime(next.date_start)+'</div>':'');
+
+    if(!current){
+      openF1State.drivers=[];openF1State.intervals=[];openF1State.raceControl=[];
+      renderOpenF1Timing();renderOpenF1Control();
+      return;
+    }
+
+    try{
+      const key=session.session_key;
+      const [drivers,intervals,control]=await Promise.all([
+        openF1Fetch('/drivers?session_key='+key),
+        openF1Fetch('/intervals?session_key='+key),
+        openF1Fetch('/race_control?session_key='+key)
+      ]);
+      openF1State.drivers=drivers;openF1State.intervals=intervals;openF1State.raceControl=control;
+      box.innerHTML+='<div style="margin-top:7px;color:var(--green)">✓ Live timing geladen</div>';
+      renderOpenF1Timing();renderOpenF1Control();
+    }catch(liveErr){
+      console.warn("OpenF1 realtime:",liveErr);
+      openF1State.drivers=[];openF1State.intervals=[];openF1State.raceControl=[];
+      box.innerHTML+='<div style="margin-top:7px"><strong>Realtime timing niet beschikbaar</strong></div><div class="muted">OpenF1 vereist authenticatie/subscriptie voor realtime data.</div>';
+      renderOpenF1Timing();renderOpenF1Control();
+    }
+  }catch(err){
+    console.warn("OpenF1 sessies:",err);
+    box.innerHTML='<div><strong>OpenF1 kon niet worden geladen</strong></div><div class="muted">Controleer je verbinding of OpenF1-configuratie.</div>';
+  }
+}
 function genericTiming(source){const data=source?.timing||source?.standings||source?.leaderboard||source?.drivers;return Array.isArray(data)?data:[]}
 function genericControl(source){const data=source?.race_control||source?.raceControl||source?.messages||source?.incidents;return Array.isArray(data)?data:[]}
 function renderTiming(container,source){container.replaceChildren();const rows=genericTiming(source).slice(0,12);if(!rows.length){container.innerHTML='<div class="muted">Geen timing-data beschikbaar.</div>';return}rows.forEach((r,i)=>{const d=document.createElement("div");d.className="timing-row";d.innerHTML='<span class="pos">'+(r.position??r.pos??i+1)+'</span><span>'+(r.driver_name??r.driver??r.name??"Coureur")+'</span><strong>'+(r.gap??r.time??r.lap_time??"—")+'</strong>';container.appendChild(d)})}
